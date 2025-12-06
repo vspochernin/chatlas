@@ -238,6 +238,7 @@ modules.xml
 
 # BlueJ files
 *.ctxt
+raw-files
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

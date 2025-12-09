@@ -3,7 +3,14 @@ package ru.hackathon.chatlas;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.hackathon.chatlas.analysis.ChatAnalyzer;
+import ru.hackathon.chatlas.analysis.StubChatAnalyzer;
+import ru.hackathon.chatlas.export.ReportRenderer;
+import ru.hackathon.chatlas.export.StubReportRenderer;
+import ru.hackathon.chatlas.parser.ChatExportParser;
+import ru.hackathon.chatlas.parser.StubChatExportParser;
 import ru.hackathon.chatlas.telegram.ChatlasBot;
+import ru.hackathon.chatlas.telegram.ChatProcessingService;
 
 @Slf4j
 public class ChatlasApplication {
@@ -16,8 +23,16 @@ public class ChatlasApplication {
         }
 
         try {
+            // TODO: Dev2, Dev3, Dev4 - заменить на реальные реализации.
+            ChatExportParser parser = new StubChatExportParser();
+            ChatAnalyzer analyzer = new StubChatAnalyzer();
+            ReportRenderer renderer = new StubReportRenderer();
+
+            ChatProcessingService processingService = new ChatProcessingService(parser, analyzer, renderer);
+            ChatlasBot bot = new ChatlasBot(botToken, processingService);
+
             TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
-            botsApplication.registerBot(botToken, new ChatlasBot(botToken));
+            botsApplication.registerBot(botToken, bot);
             log.info("Chatlas bot successfully started");
         } catch (TelegramApiException e) {
             log.error("Failed to register Telegram bot", e);

@@ -1,19 +1,17 @@
 package ru.hackathon.chatlas.domain;
 
-import java.io.InputStream;
-
 /**
- * Представление сырого файла экспорта чата.
+ * Представление сырого файла экспорта чата в виде строки JSON.
  * Используется для передачи между слоями до парсинга.
  */
-public record RawChatFile(String fileName, InputStream content) {
+public record RawChatFile(String fileName, String jsonContent) {
 
     public RawChatFile {
         if (fileName == null || fileName.isBlank()) {
             throw new IllegalArgumentException("fileName cannot be null or blank");
         }
-        if (content == null) {
-            throw new IllegalArgumentException("content cannot be null");
+        if (jsonContent == null) {
+            throw new IllegalArgumentException("jsonContent cannot be null");
         }
     }
 }

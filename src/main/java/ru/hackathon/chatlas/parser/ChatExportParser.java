@@ -1,5 +1,6 @@
 package ru.hackathon.chatlas.parser;
 
+import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.RawChatFile;
 
 /**
@@ -13,10 +14,10 @@ public interface ChatExportParser {
      * Распарсить JSON-файл экспорта чата в доменную модель.
      *
      * @param file сырой файл экспорта чата.
-     * @return объект доменной модели ChatExport (будет создан Dev2). TODO: Dev2 проставить корректный тип.
+     * @return объект доменной модели ChatExport. TODO: Dev2: Создать конкретную реализацию ChatExport.
      * @throws ChatExportParseException если файл не получается распарсить.
      */
-    Object parse(RawChatFile file) throws ChatExportParseException;
+    ChatExport parse(RawChatFile file) throws ChatExportParseException;
 
     /**
      * Исключение при парсинге JSON-экспорта.

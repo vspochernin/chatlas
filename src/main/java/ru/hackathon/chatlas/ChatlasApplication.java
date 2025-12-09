@@ -20,9 +20,8 @@ public class ChatlasApplication {
         }
 
         try {
-            // Инициализируем зависимости (stub-реализации для Dev 1)
-            // Dev 2-4 должны заменить на реальные реализации
-            // Note: ChatExportParser будет использоваться внутри ReportGenerationService (Dev 3)
+            // Dev2, Dev3, Dev4 - заменить на реальные реализации.
+            // PS. ChatExportParser будет использоваться внутри ReportGenerationService (актуально для Dev3).
             ReportGenerationService reportService = new StubReportGenerationService();
             ExcelExportService excelService = new StubExcelExportService();
 
@@ -31,14 +30,9 @@ public class ChatlasApplication {
 
             TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
             botsApplication.registerBot(botToken, bot);
-            log.info("Chatlas bot successfully started with stub implementations");
+            log.info("Chatlas bot successfully started");
 
-            // Long-polling приложение работает бесконечно до завершения процесса
-            // Resource будет освобожден при завершении JVM
-            // Добавляем shutdown hook для логирования (stop() не используется, т.к. требует обработки исключений)
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                log.info("Shutting down Chatlas bot...");
-            }));
+            // Так как у нас long-polling => приложение будет работать бесконечно до завершения процесса.
         } catch (TelegramApiException e) {
             log.error("Failed to register Telegram bot", e);
             System.exit(1);

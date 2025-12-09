@@ -42,7 +42,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
     /**
      * Хранилище накопленных файлов для каждого пользователя (chatId -> список файлов).
-     * Файлы хранятся в памяти только до обработки, затем удаляются (приватность).
+     * Файлы хранятся в памяти только до обработки, затем удаляются.
      */
     private final Map<Long, List<PendingFile>> pendingFilesByChat = new ConcurrentHashMap<>();
 
@@ -52,9 +52,11 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
     private record PendingFile(String fileName, byte[] content) {
     }
 
-    public ChatlasBot(String botToken,
-                     ReportGenerationService reportGenerationService,
-                     ExcelExportService excelExportService) {
+    public ChatlasBot(
+            String botToken,
+            ReportGenerationService reportGenerationService,
+            ExcelExportService excelExportService)
+    {
         this.telegramClient = new OkHttpTelegramClient(botToken);
         this.botToken = botToken;
         this.reportGenerationService = reportGenerationService;
@@ -65,12 +67,12 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
     @Override
     public void consume(Update update) {
         if (update == null) {
-            log.warn("Received null update, ignoring");
+            log.warn("Received null update, ignore it");
             return;
         }
 
         if (!update.hasMessage()) {
-            log.debug("Update without message, ignoring: {}", update);
+            log.warn("Update without message, ignore it: {}", update);
             return;
         }
 
@@ -85,7 +87,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             } else if (message.hasText()) {
                 handlePlainTextMessage(chatId);
             } else {
-                log.debug("Unsupported message type in chat {}: {}", chatId, message);
+                log.warn("Unsupported message type in chat {}: {}", chatId, message);
             }
         } catch (Exception e) {
             log.error("Error while processing update in chat {}", chatId, e);
@@ -107,10 +109,10 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
     private void sendStartMessage(Long chatId) {
         String msg = """
                 Привет! Я бот Chatlas
-
+                
                 Пришлите мне один или несколько JSON-файлов экспорта чата из Telegram Desktop.
                 Я обработаю их и подготовлю список участников / Excel-файл согласно заданию хакатона.
-
+                
                 Если нужна справка - используйте команду /help.
                 """.strip();
         safeSendText(chatId, msg);
@@ -119,28 +121,28 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
     private void sendHelpMessage(Long chatId) {
         String msg = String.format("""
                 Что я умею:
-
-                - Принимаю JSON-экспорт истории чата (Telegram Desktop → Export chat history → JSON).
+                
+                - Принимаю JSON-экспорт истории чата (Telegram Desktop -> Export chat history -> JSON).
                 - Можно отправить до %d файлов подряд, они будут накоплены.
                 - Для обработки всех накопленных файлов используйте команду /process.
                 - Для очистки накопленных файлов используйте команду /clear.
                 - Я разберу всех участников и упоминания из всех файлов.
                 - Если участников < 50 - отправлю список прямо в чат.
                 - Если участников ≥ 51 - сформирую и отправлю Excel-файл.
-
-                Просто отправьте мне .json-файл(ы) и затем /process.
+                
+                Просто отправьте мне .json-файл(ы) и затем команду /process.
                 """, BotConfig.MAX_FILES_PER_USER).strip();
         safeSendText(chatId, msg);
     }
 
     private void handlePlainTextMessage(Long chatId) {
         String msg = """
-                Я жду JSON-файлы экспорта чата
-
+                Я жду JSON-файлы экспорта чата.
+                
                 1) В Telegram Desktop сделайте экспорт истории чата в формате JSON.
                 2) Пришлите полученный .json-файл сюда как документ.
                 3) Я обработаю его и верну результат.
-
+                
                 Подробности - команда /help.
                 """.strip();
         safeSendText(chatId, msg);
@@ -159,11 +161,11 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
         if (!fileName.toLowerCase().endsWith(".json")) {
             safeSendText(chatId, "Я принимаю только JSON-файлы экспорта чата (расширение .json). " +
-                    "Проверьте, что вы отправили именно экспорт истории чата Telegram Desktop.");
+                    "Проверьте, что вы отправили именно экспорт истории чата Telegram Desktop в формате Json.");
             return;
         }
 
-        // Проверяем лимит файлов
+        // Проверяем лимит файлов.
         List<PendingFile> pendingFiles = pendingFilesByChat.getOrDefault(chatId, new ArrayList<>());
         if (pendingFiles.size() >= BotConfig.MAX_FILES_PER_USER) {
             safeSendText(chatId, String.format(
@@ -175,25 +177,30 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         String fileId = document.getFileId();
 
         try (InputStream inputStream = downloadFileAsStream(fileId)) {
-            // Считываем файл в память (небольшие файлы, поэтому допустимо)
+            // Считываем файл в память.
             byte[] fileContent = inputStream.readAllBytes();
 
-            // Добавляем в накопленные файлы
+            // Добавляем в накопленные файлы.
             pendingFilesByChat.computeIfAbsent(chatId, k -> new ArrayList<>())
                     .add(new PendingFile(fileName, fileContent));
 
             int totalFiles = pendingFilesByChat.get(chatId).size();
             safeSendText(chatId, String.format(
                     "Файл \"%s\" добавлен. Всего накоплено: %d/%d файлов.\n" +
-                    "Отправьте ещё файлы или используйте /process для обработки.",
-                    fileName, totalFiles, BotConfig.MAX_FILES_PER_USER));
+                            "Отправьте ещё файлы или используйте /process для обработки.",
+                    fileName,
+                    totalFiles,
+                    BotConfig.MAX_FILES_PER_USER));
 
         } catch (TelegramApiException e) {
-            log.error("Failed to download file from Telegram for chat {} fileId {}", chatId, fileId, e);
+            log.error("Failed to download file from Telegram for chat {}, fileId {}", chatId, fileId, e);
             safeSendText(chatId, "Не удалось скачать файл \"" + fileName + "\".");
         } catch (IOException e) {
-            log.error("IO error while downloading/parsing file for chat {} fileId {}", chatId, fileId, e);
+            log.error("IO error while downloading/parsing file for chat {}, fileId {}", chatId, fileId, e);
             safeSendText(chatId, "Произошла ошибка при чтении файла \"" + fileName + "\".");
+        } catch (Exception e) {
+            log.error("Unexpected error while processing file for chat {}, fileId {}", chatId, fileId, e);
+            safeSendText(chatId, "Произошла ошибка при обработке сообщения с файлом \"" + fileName + "\".");
         }
     }
 
@@ -211,7 +218,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         try {
             safeSendText(chatId, "Обрабатываю " + pendingFiles.size() + " файл(ов)...");
 
-            // Преобразуем накопленные файлы в потоки и имена
+            // Преобразуем накопленные файлы в потоки и имена.
             List<InputStream> fileStreams = new ArrayList<>();
             List<String> fileNames = new ArrayList<>();
 
@@ -220,32 +227,37 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
                 fileNames.add(file.fileName());
             }
 
-            // Обрабатываем через сервис
+            // Обрабатываем через сервис.
             ReportGenerationService.ReportResult result = reportGenerationService.processFiles(fileStreams, fileNames);
 
-            // Закрываем потоки
+            // Закрываем потоки.
             fileStreams.forEach(stream -> {
-                try { stream.close(); } catch (IOException ignored) {}
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    log.error("Failed to close file input stream for chat {}, fileId {}", chatId, fileNames, e);
+                }
             });
 
-            // Отправляем результат
+            // Отправляем результат.
             if (result.isExcelFormat()) {
                 sendExcelResult(chatId, result.getExcelData());
             } else {
                 sendTextResult(chatId, result.getTextLines());
             }
 
-            // Очищаем накопленные файлы (приватность)
+            // Очищаем накопленные файлы (важно для соблюдения условия приватности).
             pendingFilesByChat.remove(chatId);
 
         } catch (ReportGenerationService.ReportGenerationException e) {
             log.error("Failed to generate report for chat {}", chatId, e);
-            safeSendText(chatId, "Ошибка при обработке файлов: " + e.getMessage());
-            // Очищаем файлы даже при ошибке
+            safeSendText(chatId, "Ошибка при обработке файлов.");
+            // Очищаем файлы даже при ошибке.
             pendingFilesByChat.remove(chatId);
         } catch (Exception e) {
             log.error("Unexpected error processing files for chat {}", chatId, e);
             safeSendText(chatId, "Произошла непредвиденная ошибка при обработке файлов.");
+            // Очищаем файлы даже при ошибке.
             pendingFilesByChat.remove(chatId);
         }
     }
@@ -254,9 +266,8 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
      * Очищает накопленные файлы пользователя.
      */
     private void clearPendingFiles(Long chatId) {
-        int removed = pendingFilesByChat.remove(chatId) != null 
-                ? pendingFilesByChat.getOrDefault(chatId, List.of()).size() 
-                : 0;
+        List<PendingFile> removedList = pendingFilesByChat.remove(chatId);
+        int removed = removedList != null ? removedList.size() : 0;
 
         if (removed > 0) {
             safeSendText(chatId, "Очищено " + removed + " файл(ов).");
@@ -274,7 +285,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             return;
         }
 
-        // Telegram ограничивает длину сообщения 4096 символами, разбиваем на части при необходимости
+        // Вроде Telegram ограничивает длину сообщения 4096 символами, разбиваем на части при необходимости.
         StringBuilder currentMessage = new StringBuilder();
 
         for (String line : lines) {
@@ -288,7 +299,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         }
 
         // Отправляем последнее сообщение
-        if (currentMessage.length() > 0) {
+        if (!currentMessage.isEmpty()) {
             safeSendText(chatId, currentMessage.toString());
         }
     }
@@ -322,7 +333,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
         } catch (ExcelExportService.ExcelExportException e) {
             log.error("Failed to generate Excel for chat {}", chatId, e);
-            safeSendText(chatId, "Ошибка при создании Excel-файла: " + e.getMessage());
+            safeSendText(chatId, "Ошибка при создании Excel-файла.");
         } catch (TelegramApiException e) {
             log.error("Failed to send Excel file to chat {}", chatId, e);
             safeSendText(chatId, "Не удалось отправить Excel-файл.");
@@ -339,7 +350,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         }
 
         String urlString = "https://api.telegram.org/file/bot" + botToken + "/" + filePath;
-        log.debug("Downloading file from Telegram: {}", urlString);
+        log.info("Downloading file from Telegram: {}", urlString);
 
         URL url = URI.create(urlString).toURL();
         URLConnection connection = url.openConnection();

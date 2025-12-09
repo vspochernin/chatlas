@@ -16,10 +16,10 @@ public class StubChatExportParser implements ChatExportParser {
     public Object parse(InputStream inputStream, String fileName) throws ChatExportParseException {
         log.info("StubChatExportParser.parse(fileName={}) - stub implementation", fileName);
 
-        // В реальной реализации здесь будет парсинг JSON через Jackson
-        // Dev2 должен вернуть объект типа ChatExport из пакета domain
+        // В реальной реализации здесь будет парсинг JSON через Jackson.
+        // Dev2 должен вернуть объект типа ChatExport из пакета domain.
 
-        // Сейчас просто проверяем, что поток не пустой
+        // Сейчас просто проверяем, что поток не пустой.
         try {
             int bytesRead = inputStream.available();
             log.info("Stub parser: InputStream has {} bytes available", bytesRead);

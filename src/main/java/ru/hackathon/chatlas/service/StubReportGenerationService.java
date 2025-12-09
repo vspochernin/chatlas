@@ -15,26 +15,25 @@ import java.util.List;
 public class StubReportGenerationService implements ReportGenerationService {
 
     @Override
+    // TODO: заменить на List<record>.
     public ReportResult processFiles(List<InputStream> fileStreams, List<String> fileNames)
-            throws ReportGenerationException {
-
-        log.info("StubReportGenerationService.processFiles(fileCount={}, files={})",
-                fileStreams.size(), fileNames);
+            throws ReportGenerationException
+    {
+        log.info("StubReportGenerationService.processFiles(fileCount={}, files={})", fileStreams.size(), fileNames);
 
         // В реальной реализации здесь будет:
-        // 1. Вызов ChatExportParser для каждого файла
-        // 2. Вызов ParticipantExtractionService для сбора участников
-        // 3. Вызов MentionExtractionService для сбора упоминаний
-        // 4. Вызов AggregationService для объединения результатов
-        // 5. Проверка количества участников и выбор формата (список или Excel)
+        // 1. Вызов ChatExportParser для каждого файла.
+        // 2. Вызов ParticipantExtractionService для сбора участников.
+        // 3. Вызов MentionExtractionService для сбора упоминаний.
+        // 4. Вызов AggregationService для объединения результатов.
+        // 5. Проверка количества участников и выбор формата (список или Excel).
 
-        // Заглушка: всегда возвращаем список с одним элементом
+        // Заглушка.
         List<String> stubLines = new ArrayList<>();
         stubLines.add("Заглушка: файлы получены и обработаны.");
         stubLines.add("Количество файлов: " + fileStreams.size());
         stubLines.add("Имена файлов: " + String.join(", ", fileNames));
         stubLines.add("");
-        stubLines.add("(Dev3 должен реализовать реальную обработку)");
 
         return new StubReportResult(stubLines);
     }
@@ -43,6 +42,7 @@ public class StubReportGenerationService implements ReportGenerationService {
      * Заглушка результата отчета.
      */
     private static class StubReportResult implements ReportResult {
+
         private final List<String> textLines;
 
         public StubReportResult(List<String> textLines) {
@@ -51,8 +51,6 @@ public class StubReportGenerationService implements ReportGenerationService {
 
         @Override
         public boolean isExcelFormat() {
-            // Заглушка: всегда возвращаем список в чат
-            // Dev3 должен проверять: если участников >= BotConfig.EXCEL_THRESHOLD, то Excel
             return false;
         }
 
@@ -63,7 +61,7 @@ public class StubReportGenerationService implements ReportGenerationService {
 
         @Override
         public ExcelData getExcelData() {
-            return null; // Заглушка
+            return null;
         }
     }
 }

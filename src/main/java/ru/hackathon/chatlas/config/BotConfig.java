@@ -4,7 +4,6 @@ import lombok.Getter;
 
 /**
  * Конфигурация бота с основными параметрами.
- * Все параметры можно менять здесь, не затрагивая остальной код.
  */
 @Getter
 public class BotConfig {
@@ -22,13 +21,8 @@ public class BotConfig {
      */
     public static final int EXCEL_THRESHOLD = 51;
 
-    /**
-     * Минимальное количество участников для списка в чат.
-     */
-    public static final int MIN_PARTICIPANTS_FOR_LIST = 0;
-
+    // Утильный класс.
     private BotConfig() {
-        // Utility class
     }
 }
 

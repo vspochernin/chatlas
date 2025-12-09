@@ -12,56 +12,32 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-import ru.hackathon.chatlas.config.BotConfig;
-import ru.hackathon.chatlas.excel.ExcelExportService;
-import ru.hackathon.chatlas.service.ReportGenerationService;
+import ru.hackathon.chatlas.domain.RawChatFile;
+import ru.hackathon.chatlas.export.ReportRenderer;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
     private static final String COMMAND_START = "/start";
     private static final String COMMAND_HELP = "/help";
-    private static final String COMMAND_PROCESS = "/process";
-    private static final String COMMAND_CLEAR = "/clear";
 
     private final TelegramClient telegramClient;
     private final String botToken;
-    private final ReportGenerationService reportGenerationService;
-    private final ExcelExportService excelExportService;
+    private final ChatProcessingService processingService;
 
-    /**
-     * Хранилище накопленных файлов для каждого пользователя (chatId -> список файлов).
-     * Файлы хранятся в памяти только до обработки, затем удаляются.
-     */
-    private final Map<Long, List<PendingFile>> pendingFilesByChat = new ConcurrentHashMap<>();
-
-    /**
-     * Запись о файле, ожидающем обработки.
-     */
-    private record PendingFile(String fileName, byte[] content) {
-    }
-
-    public ChatlasBot(
-            String botToken,
-            ReportGenerationService reportGenerationService,
-            ExcelExportService excelExportService)
-    {
+    public ChatlasBot(String botToken, ChatProcessingService processingService) {
         this.telegramClient = new OkHttpTelegramClient(botToken);
         this.botToken = botToken;
-        this.reportGenerationService = reportGenerationService;
-        this.excelExportService = excelExportService;
-        log.info("ChatlasBot instance created with service dependencies");
+        this.processingService = processingService;
+        log.info("ChatlasBot instance created");
     }
 
     @Override
@@ -100,8 +76,6 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         switch (command) {
             case COMMAND_START -> sendStartMessage(chatId);
             case COMMAND_HELP -> sendHelpMessage(chatId);
-            case COMMAND_PROCESS -> processPendingFiles(chatId);
-            case COMMAND_CLEAR -> clearPendingFiles(chatId);
             default -> safeSendText(chatId, "Неизвестная команда. Используйте /start или /help.");
         }
     }
@@ -119,19 +93,17 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
     }
 
     private void sendHelpMessage(Long chatId) {
-        String msg = String.format("""
+        String msg = """
                 Что я умею:
                 
                 - Принимаю JSON-экспорт истории чата (Telegram Desktop -> Export chat history -> JSON).
-                - Можно отправить до %d файлов подряд, они будут накоплены.
-                - Для обработки всех накопленных файлов используйте команду /process.
-                - Для очистки накопленных файлов используйте команду /clear.
-                - Я разберу всех участников и упоминания из всех файлов.
-                - Если участников < 50 - отправлю список прямо в чат.
-                - Если участников ≥ 51 - сформирую и отправлю Excel-файл.
+                - Каждый файл обрабатывается сразу после отправки.
+                - Извлекаю участников (авторов сообщений) и упоминания (@username).
+                - Если всего сущностей < 50 - отправляю список прямо в чат.
+                - Если всего сущностей ≥ 51 - формирую и отправляю Excel-файл.
                 
-                Просто отправьте мне .json-файл(ы) и затем команду /process.
-                """, BotConfig.MAX_FILES_PER_USER).strip();
+                Просто отправьте мне .json-файл экспорта чата.
+                """.strip();
         safeSendText(chatId, msg);
     }
 
@@ -161,167 +133,88 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
         if (!fileName.toLowerCase().endsWith(".json")) {
             safeSendText(chatId, "Я принимаю только JSON-файлы экспорта чата (расширение .json). " +
-                    "Проверьте, что вы отправили именно экспорт истории чата Telegram Desktop в формате Json.");
-            return;
-        }
-
-        // Проверяем лимит файлов.
-        List<PendingFile> pendingFiles = pendingFilesByChat.getOrDefault(chatId, new ArrayList<>());
-        if (pendingFiles.size() >= BotConfig.MAX_FILES_PER_USER) {
-            safeSendText(chatId, String.format(
-                    "Достигнут лимит файлов (%d). Используйте /process для обработки накопленных файлов или /clear для очистки.",
-                    BotConfig.MAX_FILES_PER_USER));
+                    "Проверьте, что вы отправили именно экспорт истории чата Telegram Desktop в формате JSON.");
             return;
         }
 
         String fileId = document.getFileId();
 
         try (InputStream inputStream = downloadFileAsStream(fileId)) {
-            // Считываем файл в память.
-            byte[] fileContent = inputStream.readAllBytes();
+            // Скачиваем файл в память (обрабатываем "на лету", не сохраняем на диск)
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            inputStream.transferTo(buffer);
+            byte[] fileContent = buffer.toByteArray();
 
-            // Добавляем в накопленные файлы.
-            pendingFilesByChat.computeIfAbsent(chatId, k -> new ArrayList<>())
-                    .add(new PendingFile(fileName, fileContent));
+            // Создаем RawChatFile и обрабатываем сразу
+            RawChatFile rawFile = new RawChatFile(fileName, new ByteArrayInputStream(fileContent));
+            safeSendText(chatId, "Обрабатываю файл \"" + fileName + "\"...");
 
-            int totalFiles = pendingFilesByChat.get(chatId).size();
-            safeSendText(chatId, String.format(
-                    "Файл \"%s\" добавлен. Всего накоплено: %d/%d файлов.\n" +
-                            "Отправьте ещё файлы или используйте /process для обработки.",
-                    fileName,
-                    totalFiles,
-                    BotConfig.MAX_FILES_PER_USER));
+            // Обрабатываем через сервис
+            ReportRenderer.ReportResult result = processingService.process(rawFile);
+
+            // Отправляем результат
+            if (result.getType() == ReportRenderer.OutputType.EXCEL) {
+                sendExcelResult(chatId, result.getExcelBytes(), result.getExcelFileName());
+            } else {
+                sendTextResult(chatId, result.getText());
+            }
+
+            log.info("File {} processed successfully for chat {}", fileName, chatId);
 
         } catch (TelegramApiException e) {
             log.error("Failed to download file from Telegram for chat {}, fileId {}", chatId, fileId, e);
             safeSendText(chatId, "Не удалось скачать файл \"" + fileName + "\".");
         } catch (IOException e) {
-            log.error("IO error while downloading/parsing file for chat {}, fileId {}", chatId, fileId, e);
+            log.error("IO error while downloading file for chat {}, fileId {}", chatId, fileId, e);
             safeSendText(chatId, "Произошла ошибка при чтении файла \"" + fileName + "\".");
+        } catch (ChatProcessingService.ChatProcessingException e) {
+            log.error("Failed to process file {} for chat {}", fileName, chatId, e);
+            safeSendText(chatId, "Ошибка при обработке файла \"" + fileName + "\".");
         } catch (Exception e) {
             log.error("Unexpected error while processing file for chat {}, fileId {}", chatId, fileId, e);
-            safeSendText(chatId, "Произошла ошибка при обработке сообщения с файлом \"" + fileName + "\".");
-        }
-    }
-
-    /**
-     * Обрабатывает все накопленные файлы пользователя.
-     */
-    private void processPendingFiles(Long chatId) {
-        List<PendingFile> pendingFiles = pendingFilesByChat.get(chatId);
-
-        if (pendingFiles == null || pendingFiles.isEmpty()) {
-            safeSendText(chatId, "Нет накопленных файлов для обработки. Отправьте JSON-файлы.");
-            return;
-        }
-
-        try {
-            safeSendText(chatId, "Обрабатываю " + pendingFiles.size() + " файл(ов)...");
-
-            // Преобразуем накопленные файлы в потоки и имена.
-            List<InputStream> fileStreams = new ArrayList<>();
-            List<String> fileNames = new ArrayList<>();
-
-            for (PendingFile file : pendingFiles) {
-                fileStreams.add(new ByteArrayInputStream(file.content()));
-                fileNames.add(file.fileName());
-            }
-
-            // Обрабатываем через сервис.
-            ReportGenerationService.ReportResult result = reportGenerationService.processFiles(fileStreams, fileNames);
-
-            // Закрываем потоки.
-            fileStreams.forEach(stream -> {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    log.error("Failed to close file input stream for chat {}, fileId {}", chatId, fileNames, e);
-                }
-            });
-
-            // Отправляем результат.
-            if (result.isExcelFormat()) {
-                sendExcelResult(chatId, result.getExcelData());
-            } else {
-                sendTextResult(chatId, result.getTextLines());
-            }
-
-            // Очищаем накопленные файлы (важно для соблюдения условия приватности).
-            pendingFilesByChat.remove(chatId);
-
-        } catch (ReportGenerationService.ReportGenerationException e) {
-            log.error("Failed to generate report for chat {}", chatId, e);
-            safeSendText(chatId, "Ошибка при обработке файлов.");
-            // Очищаем файлы даже при ошибке.
-            pendingFilesByChat.remove(chatId);
-        } catch (Exception e) {
-            log.error("Unexpected error processing files for chat {}", chatId, e);
-            safeSendText(chatId, "Произошла непредвиденная ошибка при обработке файлов.");
-            // Очищаем файлы даже при ошибке.
-            pendingFilesByChat.remove(chatId);
-        }
-    }
-
-    /**
-     * Очищает накопленные файлы пользователя.
-     */
-    private void clearPendingFiles(Long chatId) {
-        List<PendingFile> removedList = pendingFilesByChat.remove(chatId);
-        int removed = removedList != null ? removedList.size() : 0;
-
-        if (removed > 0) {
-            safeSendText(chatId, "Очищено " + removed + " файл(ов).");
-        } else {
-            safeSendText(chatId, "Нет накопленных файлов для очистки.");
+            safeSendText(chatId, "Произошла непредвиденная ошибка при обработке файла \"" + fileName + "\".");
         }
     }
 
     /**
      * Отправляет текстовый результат в чат.
      */
-    private void sendTextResult(Long chatId, List<String> lines) {
-        if (lines == null || lines.isEmpty()) {
+    private void sendTextResult(Long chatId, String text) {
+        if (text == null || text.isBlank()) {
             safeSendText(chatId, "Результат обработки пуст.");
             return;
         }
 
-        // Вроде Telegram ограничивает длину сообщения 4096 символами, разбиваем на части при необходимости.
-        StringBuilder currentMessage = new StringBuilder();
-
-        for (String line : lines) {
-            if (currentMessage.length() + line.length() + 1 > 4000) {
-                // Отправляем текущее сообщение и начинаем новое
-                safeSendText(chatId, currentMessage.toString());
-                currentMessage = new StringBuilder(line).append("\n");
-            } else {
-                currentMessage.append(line).append("\n");
+        // Telegram ограничивает длину сообщения 4096 символами, разбиваем при необходимости
+        if (text.length() <= 4096) {
+            safeSendText(chatId, text);
+        } else {
+            // Разбиваем на части
+            int offset = 0;
+            while (offset < text.length()) {
+                int endIndex = Math.min(offset + 4000, text.length());
+                String chunk = text.substring(offset, endIndex);
+                safeSendText(chatId, chunk);
+                offset = endIndex;
             }
-        }
-
-        // Отправляем последнее сообщение
-        if (!currentMessage.isEmpty()) {
-            safeSendText(chatId, currentMessage.toString());
         }
     }
 
     /**
      * Отправляет Excel-файл в чат.
      */
-    private void sendExcelResult(Long chatId, ReportGenerationService.ExcelData excelData) {
-        if (excelData == null) {
-            safeSendText(chatId, "Данные для Excel отсутствуют.");
+    private void sendExcelResult(Long chatId, byte[] excelBytes, String fileName) {
+        if (excelBytes == null || excelBytes.length == 0) {
+            safeSendText(chatId, "Ошибка: Excel-файл пуст.");
             return;
         }
 
         try {
-            byte[] excelBytes = excelExportService.generateExcel(excelData);
+            String excelFileName = fileName != null && !fileName.isBlank() 
+                    ? fileName 
+                    : "chatlas_report.xlsx";
 
-            if (excelBytes == null || excelBytes.length == 0) {
-                safeSendText(chatId, "Ошибка: Excel-файл пуст.");
-                return;
-            }
-
-            InputFile inputFile = new InputFile(new ByteArrayInputStream(excelBytes), "chatlas_report.xlsx");
+            InputFile inputFile = new InputFile(new ByteArrayInputStream(excelBytes), excelFileName);
             SendDocument sendDocument = SendDocument.builder()
                     .chatId(String.valueOf(chatId))
                     .document(inputFile)
@@ -331,9 +224,6 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             telegramClient.execute(sendDocument);
             log.info("Excel file sent to chat {}", chatId);
 
-        } catch (ExcelExportService.ExcelExportException e) {
-            log.error("Failed to generate Excel for chat {}", chatId, e);
-            safeSendText(chatId, "Ошибка при создании Excel-файла.");
         } catch (TelegramApiException e) {
             log.error("Failed to send Excel file to chat {}", chatId, e);
             safeSendText(chatId, "Не удалось отправить Excel-файл.");

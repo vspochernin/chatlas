@@ -3,11 +3,14 @@ package ru.hackathon.chatlas;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.hackathon.chatlas.excel.ExcelExportService;
-import ru.hackathon.chatlas.excel.StubExcelExportService;
-import ru.hackathon.chatlas.service.ReportGenerationService;
-import ru.hackathon.chatlas.service.StubReportGenerationService;
+import ru.hackathon.chatlas.analysis.ChatAnalyzer;
+import ru.hackathon.chatlas.analysis.StubChatAnalyzer;
+import ru.hackathon.chatlas.export.ReportRenderer;
+import ru.hackathon.chatlas.export.StubReportRenderer;
+import ru.hackathon.chatlas.parser.ChatExportParser;
+import ru.hackathon.chatlas.parser.StubChatExportParser;
 import ru.hackathon.chatlas.telegram.ChatlasBot;
+import ru.hackathon.chatlas.telegram.ChatProcessingService;
 
 @Slf4j
 public class ChatlasApplication {
@@ -20,19 +23,22 @@ public class ChatlasApplication {
         }
 
         try {
-            // Dev2, Dev3, Dev4 - заменить на реальные реализации.
-            // PS. ChatExportParser будет использоваться внутри ReportGenerationService (актуально для Dev3).
-            ReportGenerationService reportService = new StubReportGenerationService();
-            ExcelExportService excelService = new StubExcelExportService();
+            // Dev2, Dev3, Dev4 - заменить на реальные реализации
+            ChatExportParser parser = new StubChatExportParser();
+            ChatAnalyzer analyzer = new StubChatAnalyzer();
+            ReportRenderer renderer = new StubReportRenderer();
 
-            // Создаем бота с зависимостями
-            ChatlasBot bot = new ChatlasBot(botToken, reportService, excelService);
+            // Создаем фасадный сервис обработки
+            ChatProcessingService processingService = new ChatProcessingService(parser, analyzer, renderer);
+
+            // Создаем бота
+            ChatlasBot bot = new ChatlasBot(botToken, processingService);
 
             TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
             botsApplication.registerBot(botToken, bot);
             log.info("Chatlas bot successfully started");
 
-            // Так как у нас long-polling => приложение будет работать бесконечно до завершения процесса.
+            // Long-polling приложение работает бесконечно до завершения процесса
         } catch (TelegramApiException e) {
             log.error("Failed to register Telegram bot", e);
             System.exit(1);

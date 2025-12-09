@@ -8,7 +8,7 @@ import java.io.IOException;
 /**
  * Заглушка парсера для демонстрации работы архитектуры.
  *
- * @implNote Dev2: Заменить на реальную реализацию JacksonChatExportParser
+ * @implNote TODO: Dev2: Заменить на реальную реализацию JacksonChatExportParser
  */
 @Slf4j
 public class StubChatExportParser implements ChatExportParser {

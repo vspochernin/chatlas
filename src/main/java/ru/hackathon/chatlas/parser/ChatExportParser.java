@@ -5,15 +5,15 @@ import ru.hackathon.chatlas.domain.RawChatFile;
 /**
  * Интерфейс для парсинга JSON-экспорта чата Telegram в доменную модель.
  *
- * @implNote Dev2: Реализовать JacksonChatExportParser с использованием Jackson
+ * @implNote TODO: Dev2: Реализовать JacksonChatExportParser с использованием Jackson.
  */
 public interface ChatExportParser {
 
     /**
-     * Парсит JSON-файл экспорта чата в доменную модель.
+     * Распарсить JSON-файл экспорта чата в доменную модель.
      *
      * @param file сырой файл экспорта чата.
-     * @return объект доменной модели ChatExport (будет создан Dev2).
+     * @return объект доменной модели ChatExport (будет создан Dev2). TODO: Dev2 проставить корректный тип.
      * @throws ChatExportParseException если файл не получается распарсить.
      */
     Object parse(RawChatFile file) throws ChatExportParseException;

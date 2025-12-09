@@ -150,14 +150,13 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             inputStream.transferTo(buffer);
             byte[] fileContent = buffer.toByteArray();
 
-            // Создаем RawChatFile и обрабатываем сразу
             RawChatFile rawFile = new RawChatFile(fileName, new ByteArrayInputStream(fileContent));
             safeSendText(chatId, "Обрабатываю файл \"" + fileName + "\"...");
 
-            // Обрабатываем через сервис
+            // Обрабатываем через сервис.
             ReportRenderer.ReportResult result = processingService.process(rawFile);
 
-            // Отправляем результат
+            // Отправляем результат.
             if (result.getType() == ReportRenderer.OutputType.EXCEL) {
                 sendExcelResult(chatId, result.getExcelBytes(), result.getExcelFileName());
             } else {
@@ -165,7 +164,6 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             }
 
             log.info("File {} processed successfully for chat {}", fileName, chatId);
-
         } catch (TelegramApiException e) {
             log.error("Failed to download file from Telegram for chat {}, fileId {}", chatId, fileId, e);
             safeSendText(chatId, "Не удалось скачать файл \"" + fileName + "\".");
@@ -174,23 +172,22 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             safeSendText(chatId, "Произошла ошибка при чтении файла \"" + fileName + "\".");
         } catch (ChatProcessingService.ChatProcessingException e) {
             log.error("Failed to process file {} for chat {}", fileName, chatId, e);
-            safeSendText(chatId, "Ошибка при обработке файла \"" + fileName + "\".");
+            safeSendText(chatId, "Произошла ошибка при обработке файла \"" + fileName + "\".");
         } catch (Exception e) {
             log.error("Unexpected error while processing file for chat {}, fileId {}", chatId, fileId, e);
             safeSendText(chatId, "Произошла непредвиденная ошибка при обработке файла \"" + fileName + "\".");
         }
     }
 
-    /**
-     * Отправляет текстовый результат в чат.
-     */
+    // Отправить текстовый результат пользователю.
     private void sendTextResult(Long chatId, String text) {
         if (text == null || text.isBlank()) {
-            safeSendText(chatId, "Результат обработки пуст.");
+            log.error("Text is null or blank for chatId {}", chatId);
+            safeSendText(chatId, "Ошибка: результат обработки пуст.");
             return;
         }
 
-        // Telegram ограничивает длину сообщения 4096 символами, разбиваем при необходимости
+        // Telegram ограничивает длину сообщения 4096 символами, разбиваем при необходимости.
         if (text.length() <= 4096) {
             safeSendText(chatId, text);
         } else {
@@ -205,11 +202,10 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    /**
-     * Отправляет Excel-файл в чат.
-     */
+    // Отправить Excel результат пользователю.
     private void sendExcelResult(Long chatId, byte[] excelBytes, String fileName) {
         if (excelBytes == null || excelBytes.length == 0) {
+            log.error("Excel bytes is null or blank for chatId {}", chatId);
             safeSendText(chatId, "Ошибка: Excel-файл пуст.");
             return;
         }
@@ -254,7 +250,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
     private void safeSendText(Long chatId, String text) {
         if (chatId == null) {
-            log.warn("Attempted to send message with null chatId, skipping");
+            log.warn("Attempted to send message with null chatId, skip");
             return;
         }
 

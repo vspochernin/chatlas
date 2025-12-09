@@ -27,7 +27,7 @@ public class StubChatAnalyzer implements ChatAnalyzer {
      * Заглушка результата анализа.
      */
     private static class StubChatAnalysisResult implements ChatAnalysisResult {
-        // Будет определено Dev3
+        // Будет определено Dev3.
     }
 }
 

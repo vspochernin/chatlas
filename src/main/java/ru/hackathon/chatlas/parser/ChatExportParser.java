@@ -14,7 +14,7 @@ public interface ChatExportParser {
      * Распарсить JSON-файл экспорта чата в доменную модель.
      *
      * @param file сырой файл экспорта чата.
-     * @return объект доменной модели ChatExport. TODO: Dev2: Создать конкретную реализацию ChatExport.
+     * @return объект доменной модели ChatExport. TODO: Dev2: Заменить интерфейс ChatExport реальным классом.
      * @throws ChatExportParseException если файл не получается распарсить.
      */
     ChatExport parse(RawChatFile file) throws ChatExportParseException;

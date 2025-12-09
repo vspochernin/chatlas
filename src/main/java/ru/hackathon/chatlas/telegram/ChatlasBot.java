@@ -28,6 +28,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
     private static final String COMMAND_START = "/start";
     private static final String COMMAND_HELP = "/help";
+    private static final String API_TELEGRAM_FILE_BOT_BASE_URL = "https://api.telegram.org/file/bot";
 
     private final TelegramClient telegramClient;
     private final String botToken;
@@ -110,7 +111,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
     private void handlePlainTextMessage(Long chatId) {
         String msg = """
-                Я жду JSON-файлы экспорта чата.
+                Привет! Я жду JSON-файлы экспорта чата.
                 
                 1) В Telegram Desktop сделайте экспорт истории чата в формате JSON.
                 2) Пришлите полученный .json-файл сюда как документ.
@@ -150,7 +151,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             inputStream.transferTo(buffer);
             byte[] fileContent = buffer.toByteArray();
 
-            // Преобразуем байты в строку JSON (UTF-8)
+            // Преобразуем байты в строку JSON (UTF-8).
             String jsonContent = new String(fileContent, java.nio.charset.StandardCharsets.UTF_8);
             RawChatFile rawFile = new RawChatFile(fileName, jsonContent);
             safeSendText(chatId, "Обрабатываю файл \"" + fileName + "\"...");
@@ -181,7 +182,6 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    // Отправить текстовый результат пользователю.
     private void sendTextResult(Long chatId, String text) {
         if (text == null || text.isBlank()) {
             log.error("Text is null or blank for chatId {}", chatId);
@@ -204,7 +204,6 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    // Отправить Excel результат пользователю.
     private void sendExcelResult(Long chatId, byte[] excelBytes, String fileName) {
         if (excelBytes == null || excelBytes.length == 0) {
             log.error("Excel bytes is null or blank for chatId {}", chatId);
@@ -242,7 +241,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             throw new IllegalStateException("Received empty filePath for fileId " + fileId);
         }
 
-        String urlString = "https://api.telegram.org/file/bot" + botToken + "/" + filePath;
+        String urlString = API_TELEGRAM_FILE_BOT_BASE_URL + botToken + "/" + filePath;
         log.info("Downloading file from Telegram: {}", urlString);
 
         URL url = URI.create(urlString).toURL();

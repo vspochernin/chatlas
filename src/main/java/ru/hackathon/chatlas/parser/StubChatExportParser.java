@@ -17,7 +17,6 @@ public class StubChatExportParser implements ChatExportParser {
         log.info("StubChatExportParser.parse(fileName={}) - stub implementation", file.fileName());
 
         // TODO: Dev2: В реальной реализации здесь будет парсинг JSON через Jackson.
-        // TODO: Dev2: Вернуть объект конкретной реализации ChatExport из пакета domain.
 
         // Заглушка: просто проверяем, что строка не пустая.
         if (file.jsonContent().isBlank()) {
@@ -25,13 +24,7 @@ public class StubChatExportParser implements ChatExportParser {
         }
 
         log.info("Stub parser: JSON content length = {} characters", file.jsonContent().length());
-        return new StubChatExport(file.fileName(), file.jsonContent().length());
-    }
-
-    /**
-     * Заглушка реализации ChatExport.
-     */
-    private record StubChatExport(String fileName, int contentLength) implements ChatExport {
+        return null;
     }
 }
 

@@ -9,7 +9,7 @@ import ru.hackathon.chatlas.parser.ChatExportParser;
  * Фасадный сервис для обработки файла экспорта чата.
  * Координирует работу парсера, анализатора и рендерера.
  *
- * @implNote TODO: Dev3, Dev4: Интегрировать реальные реализации сервисов
+ * @implNote TODO: Dev2, Dev3, Dev4: Интегрировать реальные реализации сервисов
  */
 public class ChatProcessingService {
 
@@ -36,13 +36,13 @@ public class ChatProcessingService {
      */
     public ReportRenderer.ReportResult process(RawChatFile file) throws ChatProcessingException {
         try {
-            // 1. Парсим JSON в доменную модель
+            // 1. Парсим JSON в доменную модель.
             var chatExport = parser.parse(file);
 
-            // 2. Анализируем и извлекаем участников/упоминания
+            // 2. Анализируем и извлекаем участников/упоминания.
             ChatAnalyzer.ChatAnalysisResult analysisResult = analyzer.analyze(chatExport);
 
-            // 3. Форматируем результат (текст или Excel)
+            // 3. Форматируем результат в (текст или Excel).
             return renderer.render(analysisResult);
 
         } catch (ChatExportParser.ChatExportParseException e) {

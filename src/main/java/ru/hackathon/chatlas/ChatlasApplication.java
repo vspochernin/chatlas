@@ -28,15 +28,12 @@ public class ChatlasApplication {
             ChatAnalyzer analyzer = new StubChatAnalyzer();
             ReportRenderer renderer = new StubReportRenderer();
 
-            // Единый сервис обработки (фасад).
             ChatProcessingService processingService = new ChatProcessingService(parser, analyzer, renderer);
-
             ChatlasBot bot = new ChatlasBot(botToken, processingService);
 
             TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
             botsApplication.registerBot(botToken, bot);
             log.info("Chatlas bot successfully started");
-            // Long-polling приложение работает бесконечно до завершения процесса.
         } catch (TelegramApiException e) {
             log.error("Failed to register Telegram bot", e);
             System.exit(1);

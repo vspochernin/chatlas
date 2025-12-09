@@ -14,17 +14,20 @@ public class StubChatExportParser implements ChatExportParser {
 
     @Override
     public ChatExport parse(RawChatFile file) throws ChatExportParseException {
-        log.info("StubChatExportParser.parse(fileName={}) - stub implementation", file.fileName());
+        log.info("Parsing file: {}", file.fileName());
 
-        // TODO: Dev2: В реальной реализации здесь будет парсинг JSON через Jackson.
-
-        // Заглушка: просто проверяем, что строка не пустая.
         if (file.jsonContent().isBlank()) {
             throw new ChatExportParseException("JSON content is blank");
         }
 
-        log.info("Stub parser: JSON content length = {} characters", file.jsonContent().length());
-        return null;
+        log.info("JSON content length: {} chars", file.jsonContent().length());
+        
+        // TODO: Dev2: Реализовать парсинг JSON через Jackson, вернуть ChatExport
+        return new StubChatExportImpl();
+    }
+
+    // TODO: Dev2: Имплементации не будет, т.к. это заглушка. Будет просто модель.
+    private static class StubChatExportImpl implements ChatExport {
     }
 }
 

@@ -20,16 +20,11 @@ public interface ChatAnalyzer {
 
     /**
      * Результат анализа чата.
-     * Содержит уникальных участников и упоминания.
      *
      * @implNote TODO: Dev3: Определить структуру с Set<Participant> и Set<Mention>
      */
     interface ChatAnalysisResult {
-        // TODO: Dev3: Будет определено Dev3
-        // TODO: Dev3: Должен содержать:
-        // TODO: Dev3: - Set<Participant> participants
-        // TODO: Dev3: - Set<Mention> mentions
-        // TODO: Dev3: - методы для получения counts: participantsCount(), mentionsCount(), totalCount()
+        // TODO: Dev3: Добавить методы для получения участников, упоминаний и их количества
     }
 
     /**

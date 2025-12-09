@@ -13,29 +13,21 @@ public class StubReportRenderer implements ReportRenderer {
 
     @Override
     public ReportResult render(ChatAnalyzer.ChatAnalysisResult analysisResult) throws ReportRenderException {
-        log.info("StubReportRenderer.render() - stub implementation");
+        log.info("Rendering report");
 
-        // TODO: Dev4: В реальной реализации здесь будет:
-        // TODO: Dev4: 1. Получение totalCount из analysisResult (participantsCount + mentionsCount).
-        // TODO: Dev4: 2. Если totalCount < 50 - формирование текстового ответа с участниками и упоминаниями.
-        // TODO: Dev4: 3. Если totalCount >= 51 - генерация Excel через Apache POI (два листа: Participants и Mentions).
-        // TODO: Dev4: 4. Возврат соответствующего ReportResult.
-
+        // TODO: Dev4: Получить totalCount, выбрать формат (TEXT/EXCEL), сгенерировать результат
         return new StubReportResult();
     }
 
-    /**
-     * Заглушка результата рендеринга.
-     */
     private static class StubReportResult implements ReportResult {
         @Override
         public OutputType getType() {
-            return OutputType.TEXT; // Заглушка: всегда возвращаем текст
+            return OutputType.TEXT;
         }
 
         @Override
         public String getText() {
-            return "Заглушка: результат обработки.\n(Dev4 должен реализовать реальный рендеринг)";
+            return "Результат обработки (заглушка)";
         }
 
         @Override

@@ -64,6 +64,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
                 handlePlainTextMessage(chatId);
             } else {
                 log.warn("Unsupported message type in chat {}: {}", chatId, message);
+                safeSendText(chatId, "Я способен обработать только текст, файлы или команды.");
             }
         } catch (Exception e) {
             log.error("Error while processing update in chat {}", chatId, e);
@@ -82,7 +83,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
     private void sendStartMessage(Long chatId) {
         String msg = """
-                Привет! Я бот Chatlas
+                Привет! Я бот Chatlas.
                 
                 Пришлите мне один или несколько JSON-файлов экспорта чата из Telegram Desktop.
                 Я обработаю их и подготовлю список участников / Excel-файл согласно заданию хакатона.
@@ -100,7 +101,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
                 - Каждый файл обрабатывается сразу после отправки.
                 - Извлекаю участников (авторов сообщений) и упоминания (@username).
                 - Если всего сущностей < 50 - отправляю список прямо в чат.
-                - Если всего сущностей ≥ 51 - формирую и отправляю Excel-файл.
+                - Если всего сущностей >= 51 - формирую и отправляю Excel-файл.
                 
                 Просто отправьте мне .json-файл экспорта чата.
                 """.strip();
@@ -124,8 +125,12 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         String fileName = document.getFileName();
         String mimeType = document.getMimeType();
 
-        log.info("Received document from chat {}: name='{}', mime='{}', size={}",
-                chatId, fileName, mimeType, document.getFileSize());
+        log.info(
+                "Received document from chat {}: name='{}', mime='{}', size={}",
+                chatId,
+                fileName,
+                mimeType,
+                document.getFileSize());
 
         if (fileName == null) {
             fileName = "unknown.json";
@@ -140,7 +145,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         String fileId = document.getFileId();
 
         try (InputStream inputStream = downloadFileAsStream(fileId)) {
-            // Скачиваем файл в память (обрабатываем "на лету", не сохраняем на диск)
+            // Скачиваем файл в память (обрабатываем "на лету", не сохраняем на диск).
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             inputStream.transferTo(buffer);
             byte[] fileContent = buffer.toByteArray();
@@ -210,8 +215,8 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         }
 
         try {
-            String excelFileName = fileName != null && !fileName.isBlank() 
-                    ? fileName 
+            String excelFileName = fileName != null && !fileName.isBlank()
+                    ? fileName
                     : "chatlas_report.xlsx";
 
             InputFile inputFile = new InputFile(new ByteArrayInputStream(excelBytes), excelFileName);

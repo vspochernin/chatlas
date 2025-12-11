@@ -8,7 +8,7 @@ import ru.hackathon.chatlas.analysis.StubChatAnalyzer;
 import ru.hackathon.chatlas.export.ReportRenderer;
 import ru.hackathon.chatlas.export.StubReportRenderer;
 import ru.hackathon.chatlas.parser.ChatExportParser;
-import ru.hackathon.chatlas.parser.StubChatExportParser;
+import ru.hackathon.chatlas.parser.JacksonChatExportParserImpl;
 import ru.hackathon.chatlas.telegram.ChatlasBot;
 import ru.hackathon.chatlas.telegram.ChatProcessingService;
 
@@ -24,7 +24,7 @@ public class ChatlasApplication {
 
         try {
             // TODO: Dev2, Dev3, Dev4 - заменить на реальные реализации.
-            ChatExportParser parser = new StubChatExportParser();
+            ChatExportParser parser = new JacksonChatExportParserImpl();
             ChatAnalyzer analyzer = new StubChatAnalyzer();
             ReportRenderer renderer = new StubReportRenderer();
 

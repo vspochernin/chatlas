@@ -2,7 +2,7 @@ package ru.hackathon.chatlas;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import ru.hackathon.chatlas.domain.ChatExportModel;
+import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.RawChatFile;
 import ru.hackathon.chatlas.parser.JacksonChatExportParserImpl;
 
@@ -22,12 +22,12 @@ class JacksonChatExportParserTest {
         String jsonContent = Files.readString(filePath, StandardCharsets.UTF_8);
         RawChatFile file = new RawChatFile("chat1.json", jsonContent);
         JacksonChatExportParserImpl parser = new JacksonChatExportParserImpl();
-        ChatExportModel result = (ChatExportModel) parser.parse(file);
+        ChatExport result = parser.parse(file);
         assertNotNull(result);
         assertNotNull(result.getMessages());
         assertFalse(result.getMessages().isEmpty());
         boolean hasValidMessage = false;
-        for (ChatExportModel.Message message : result.getMessages()) {
+        for (ChatExport.Message message : result.getMessages()) {
                 hasValidMessage = true;
                 System.out.println(message);
 //                break;
@@ -35,3 +35,5 @@ class JacksonChatExportParserTest {
         assertTrue(hasValidMessage, "No valid messages found");
     }
 }
+// кодировка
+//[Console]::OutputEncoding = [System.Text.Encoding]::UTF8

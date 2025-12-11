@@ -28,8 +28,8 @@ class JacksonChatExportParserTest {
         assertFalse(result.getMessages().isEmpty());
         boolean hasValidMessage = false;
         for (ChatExport.Message message : result.getMessages()) {
-                hasValidMessage = true;
-                System.out.println(message);
+            hasValidMessage = true;
+            System.out.println(message);
 //                break;
         }
         assertTrue(hasValidMessage, "No valid messages found");

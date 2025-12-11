@@ -9,7 +9,7 @@ import ru.hackathon.chatlas.parser.ChatExportParser;
  * Фасадный сервис для обработки файла экспорта чата.
  * Координирует работу парсера, анализатора и рендерера.
  *
- * @implNote TODO: Dev2, Dev3, Dev4: Интегрировать реальные реализации сервисов
+ * @implNote TODO: Dev3, Dev4: Интегрировать реальные реализации сервисов.
  */
 public class ChatProcessingService {
 

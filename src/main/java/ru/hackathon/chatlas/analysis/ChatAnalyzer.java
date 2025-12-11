@@ -12,7 +12,7 @@ public interface ChatAnalyzer {
     /**
      * Проанализировать экспорт чата и извлечь участников и упоминания.
      *
-     * @param chatExport объект доменной модели ChatExport. TODO: Dev2: Будет создана конкретная реализация.
+     * @param chatExport объект доменной модели ChatExport.
      * @return результат анализа с уникальными участниками и упоминаниями.
      * @throws ChatAnalysisException если анализ не удался.
      */

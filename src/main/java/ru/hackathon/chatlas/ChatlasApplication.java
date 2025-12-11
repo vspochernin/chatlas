@@ -23,7 +23,7 @@ public class ChatlasApplication {
         }
 
         try {
-            // TODO: Dev2, Dev3, Dev4 - заменить на реальные реализации.
+            // TODO: Dev3, Dev4 - заменить на реальные реализации.
             ChatExportParser parser = new JacksonChatExportParserImpl();
             ChatAnalyzer analyzer = new StubChatAnalyzer();
             ReportRenderer renderer = new StubReportRenderer();

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.hackathon.chatlas.domain.ChatExportModel;
 import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.RawChatFile;
 
@@ -28,7 +27,7 @@ public class JacksonChatExportParserImpl implements ChatExportParser {
                 throw new ChatExportParseException("JSON content is blank");
             }
 
-            return objectMapper.readValue(file.jsonContent(), ChatExportModel.class);
+            return objectMapper.readValue(file.jsonContent(), ChatExport.class);
 
         } catch (Exception e) {
             log.error("Parse error: {}", e.getMessage());

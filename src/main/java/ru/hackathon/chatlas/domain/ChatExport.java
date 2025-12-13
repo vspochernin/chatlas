@@ -3,7 +3,6 @@ package ru.hackathon.chatlas.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,11 +17,14 @@ public class ChatExport {
     private String name;
     private String type;
     private Long id;
-    private List<ChatExport.Message> messages;
+    private List<Message> messages;
 
+    /**
+     * Сообщение в чате.
+     * Поле text из JSON не парсится, т.к. может быть строкой или массивом.
+     * Используется только textEntities для извлечения упоминаний.
+     */
     @Data
-    @Slf4j
-    @JsonIgnoreProperties({"text"})
     public static class Message {
         private String from;
 
@@ -32,6 +34,10 @@ public class ChatExport {
         @JsonProperty("text_entities")
         private List<TextEntity> textEntities;
 
+        /**
+         * Получить текст сообщения из textEntities.
+         * Используется для удобства, основная логика работы с textEntities.
+         */
         public String getText() {
             if (textEntities == null) {
                 return "";
@@ -44,6 +50,9 @@ public class ChatExport {
         }
     }
 
+    /**
+     * Текстовая сущность в сообщении (plain, mention и т.д.).
+     */
     @Data
     public static class TextEntity {
         private String type;

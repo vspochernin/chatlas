@@ -59,4 +59,3 @@ public class ChatExport {
         private String text;
     }
 }
-

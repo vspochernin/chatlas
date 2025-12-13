@@ -1,11 +1,10 @@
 package ru.hackathon.chatlas.analysis;
 
+import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 import ru.hackathon.chatlas.domain.ChatExport;
 
 /**
  * Интерфейс для анализа экспорта чата и извлечения участников и упоминаний.
- *
- * @implNote TODO: Dev3: Реализовать логику извлечения участников и упоминаний из ChatExport
  */
 public interface ChatAnalyzer {
 
@@ -17,15 +16,6 @@ public interface ChatAnalyzer {
      * @throws ChatAnalysisException если анализ не удался.
      */
     ChatAnalysisResult analyze(ChatExport chatExport) throws ChatAnalysisException;
-
-    /**
-     * Результат анализа чата.
-     *
-     * @implNote TODO: Dev3: Определить структуру с Set<Participant> и Set<Mention>
-     */
-    interface ChatAnalysisResult {
-        // TODO: Dev3: Добавить методы для получения участников, упоминаний и их количества
-    }
 
     /**
      * Исключение при анализе чата.
@@ -40,4 +30,3 @@ public interface ChatAnalyzer {
         }
     }
 }
-

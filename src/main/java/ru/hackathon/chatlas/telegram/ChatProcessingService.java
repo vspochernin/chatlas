@@ -1,6 +1,8 @@
 package ru.hackathon.chatlas.telegram;
 
 import ru.hackathon.chatlas.analysis.ChatAnalyzer;
+import ru.hackathon.chatlas.domain.ChatAnalysisResult;
+import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.RawChatFile;
 import ru.hackathon.chatlas.export.ReportRenderer;
 import ru.hackathon.chatlas.parser.ChatExportParser;
@@ -37,10 +39,10 @@ public class ChatProcessingService {
     public ReportRenderer.ReportResult process(RawChatFile file) throws ChatProcessingException {
         try {
             // 1. Парсим JSON в доменную модель.
-            var chatExport = parser.parse(file);
+            ChatExport chatExport = parser.parse(file);
 
             // 2. Анализируем и извлекаем участников/упоминания.
-            ChatAnalyzer.ChatAnalysisResult analysisResult = analyzer.analyze(chatExport);
+            ChatAnalysisResult analysisResult = analyzer.analyze(chatExport);
 
             // 3. Форматируем результат в (текст или Excel).
             return renderer.render(analysisResult);
@@ -67,4 +69,3 @@ public class ChatProcessingService {
         }
     }
 }
-

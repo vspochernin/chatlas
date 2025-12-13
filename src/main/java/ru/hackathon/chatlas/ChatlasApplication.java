@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.hackathon.chatlas.analysis.ChatAnalyzer;
-import ru.hackathon.chatlas.analysis.StubChatAnalyzer;
+import ru.hackathon.chatlas.analysis.ChatAnalyzerImpl;
 import ru.hackathon.chatlas.export.ReportRenderer;
 import ru.hackathon.chatlas.export.StubReportRenderer;
 import ru.hackathon.chatlas.parser.ChatExportParser;
@@ -23,9 +23,9 @@ public class ChatlasApplication {
         }
 
         try {
-            // TODO: Dev3, Dev4 - заменить на реальные реализации.
+            // TODO: Dev4 - заменить StubReportRenderer на реальную реализацию.
             ChatExportParser parser = new JacksonChatExportParserImpl();
-            ChatAnalyzer analyzer = new StubChatAnalyzer();
+            ChatAnalyzer analyzer = new ChatAnalyzerImpl();
             ReportRenderer renderer = new StubReportRenderer();
 
             ChatProcessingService processingService = new ChatProcessingService(parser, analyzer, renderer);

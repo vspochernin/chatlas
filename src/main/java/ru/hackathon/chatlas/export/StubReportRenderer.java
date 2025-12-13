@@ -1,7 +1,7 @@
 package ru.hackathon.chatlas.export;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.hackathon.chatlas.analysis.ChatAnalyzer;
+import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 
 /**
  * Заглушка рендерера отчетов для демонстрации работы архитектуры.
@@ -12,7 +12,7 @@ import ru.hackathon.chatlas.analysis.ChatAnalyzer;
 public class StubReportRenderer implements ReportRenderer {
 
     @Override
-    public ReportResult render(ChatAnalyzer.ChatAnalysisResult analysisResult) throws ReportRenderException {
+    public ReportResult render(ChatAnalysisResult analysisResult) throws ReportRenderException {
         log.info("Rendering report");
 
         // TODO: Dev4: Получить totalCount, выбрать формат (TEXT/EXCEL), сгенерировать результат
@@ -41,4 +41,3 @@ public class StubReportRenderer implements ReportRenderer {
         }
     }
 }
-

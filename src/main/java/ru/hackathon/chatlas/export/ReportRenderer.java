@@ -1,6 +1,6 @@
 package ru.hackathon.chatlas.export;
 
-import ru.hackathon.chatlas.analysis.ChatAnalyzer;
+import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 
 /**
  * Сервис для форматирования результата анализа: текст или Excel.
@@ -16,7 +16,7 @@ public interface ReportRenderer {
      * @return результат в формате текста или Excel.
      * @throws ReportRenderException если не удалось сформировать результат.
      */
-    ReportResult render(ChatAnalyzer.ChatAnalysisResult analysisResult) throws ReportRenderException;
+    ReportResult render(ChatAnalysisResult analysisResult) throws ReportRenderException;
 
     /**
      * Результат форматирования отчета.
@@ -64,4 +64,3 @@ public interface ReportRenderer {
         }
     }
 }
-

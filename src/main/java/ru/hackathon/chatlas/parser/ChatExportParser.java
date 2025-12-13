@@ -5,7 +5,6 @@ import ru.hackathon.chatlas.domain.RawChatFile;
 
 /**
  * Интерфейс для парсинга JSON-экспорта чата Telegram в доменную модель.
- *
  */
 public interface ChatExportParser {
 

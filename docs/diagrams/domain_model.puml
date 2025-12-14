@@ -1,0 +1,92 @@
+@startuml domain_model
+title Chatlas class diagram (high level)
+
+package "domain" {
+  class RawChatFile {
+    - id : String
+    - fileName : String
+    - content : byte[]
+    - contentType : String
+  }
+
+  class ChatExport {
+    - chatId : String
+    - chatTitle : String
+    - messages : List<Object>
+  }
+
+  class Participant {
+    - userId : String
+    - displayName : String
+    - username : String
+    - hasChannel : boolean
+    - registeredAt : java.time.Instant
+  }
+
+  class Mention {
+    - fromUserId : String
+    - mentionedUserId : String
+    - messageId : String
+  }
+
+  class ChatAnalysisResult {
+    - participants : List<Participant>
+    - mentions : List<Mention>
+    - channels : List<String>
+  }
+}
+
+package "telegram" {
+  class ChatlasBot {
+    +onUpdateReceived(update)
+    +getBotUsername() : String
+    +getBotToken() : String
+  }
+
+  class ChatProcessingService {
+    +processUpdate(update)
+    +processFiles(files)
+  }
+}
+
+package "parser" {
+  class ExportParser {
+    +parse(rawFile : RawChatFile) : ChatExport
+  }
+}
+
+package "analysis" {
+  class ChatAnalysisService {
+    +analyze(export : ChatExport) : ChatAnalysisResult
+  }
+}
+
+package "export" {
+  class ReportGenerator {
+    +generateText(result : ChatAnalysisResult) : String
+    +generateExcel(result : ChatAnalysisResult) : byte[]
+  }
+}
+
+class ChatlasApplication {
+  +main(args : String[])
+}
+
+' Связи между классами
+
+ChatlasApplication --> ChatlasBot
+ChatlasBot --> ChatProcessingService
+
+ChatProcessingService --> ExportParser
+ChatProcessingService --> ChatAnalysisService
+ChatProcessingService --> ReportGenerator
+
+ExportParser --> RawChatFile
+ExportParser --> ChatExport
+
+ChatAnalysisService --> ChatExport
+ChatAnalysisService --> ChatAnalysisResult
+ChatAnalysisResult "1" o-- "*" Participant
+ChatAnalysisResult "1" o-- "*" Mention
+
+@enduml

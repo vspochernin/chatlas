@@ -1,0 +1,29 @@
+@startuml deployment
+title Chatlas deployment (Docker + long polling)
+
+node "User device" {
+  artifact "Telegram Client\n(mobile/desktop/web)" as TgClient
+}
+
+node "Telegram Cloud" {
+  artifact "Telegram Bot API" as TgAPI
+}
+
+node "Server host" {
+  node "Docker Engine" as Docker {
+    node "chatlas-bot container" {
+      artifact "Chatlas Java app\n(Java 21 + Maven)" as App
+      artifact ".env / TELEGRAM_BOT_TOKEN" as Env
+      artifact "Logs (stdout/SLF4J)" as Logs
+    }
+  }
+}
+
+TgClient --> TgAPI : send messages/files
+App --> TgAPI : getUpdates(long polling)
+TgAPI --> App : updates (messages + documents)
+
+App --> Logs : log events
+Env --> App : bot token (env var)
+
+@enduml

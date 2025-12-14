@@ -5,8 +5,8 @@ import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.hackathon.chatlas.analysis.ChatAnalyzer;
 import ru.hackathon.chatlas.analysis.ChatAnalyzerImpl;
+import ru.hackathon.chatlas.export.DefaultReportRenderer;
 import ru.hackathon.chatlas.export.ReportRenderer;
-import ru.hackathon.chatlas.export.StubReportRenderer;
 import ru.hackathon.chatlas.parser.ChatExportParser;
 import ru.hackathon.chatlas.parser.JacksonChatExportParserImpl;
 import ru.hackathon.chatlas.telegram.ChatlasBot;
@@ -23,10 +23,9 @@ public class ChatlasApplication {
         }
 
         try {
-            // TODO: Dev4 - заменить StubReportRenderer на реальную реализацию.
             ChatExportParser parser = new JacksonChatExportParserImpl();
             ChatAnalyzer analyzer = new ChatAnalyzerImpl();
-            ReportRenderer renderer = new StubReportRenderer();
+            ReportRenderer renderer = new DefaultReportRenderer();
 
             ChatProcessingService processingService = new ChatProcessingService(parser, analyzer, renderer);
             ChatlasBot bot = new ChatlasBot(botToken, processingService);

@@ -5,7 +5,6 @@ import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 /**
  * Сервис для форматирования результата анализа: текст или Excel.
  *
- * @implNote TODO: Dev4: Реализовать логику выбора формата и генерации результата.
  */
 public interface ReportRenderer {
 

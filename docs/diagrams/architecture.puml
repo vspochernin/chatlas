@@ -1,0 +1,62 @@
+@startuml chatlas_architecture
+title Chatlas high-level architecture
+
+package "Telegram" {
+  actor "User" as User
+  [Telegram Client] as TgClient
+  [Telegram Bot API] as TgAPI
+}
+
+package "Chatlas Application" {
+  [ChatlasApplication] as App
+
+  package "telegram" {
+    [UpdateHandler] as UpdateHandler
+    [CommandHandler] as CommandHandler
+  }
+
+  package "parser" {
+    [ExportParser] as ExportParser
+  }
+
+  package "analysis" {
+    [ChatAnalysisService] as Analysis
+  }
+
+  package "export" {
+    [ReportGenerator] as ReportGen
+  }
+
+  package "domain" {
+    [UserEntity] as UserEntity
+    [ChatEntity] as ChatEntity
+    [MessageEntity] as MessageEntity
+  }
+
+  package "config" {
+    [BotConfig] as BotConfig
+  }
+}
+
+User --> TgClient
+TgClient --> TgAPI
+TgAPI --> UpdateHandler : updates
+
+App --> BotConfig
+App --> UpdateHandler
+
+UpdateHandler --> CommandHandler : commands/messages
+UpdateHandler --> ExportParser : files (export)
+
+ExportParser --> MessageEntity
+ExportParser --> UserEntity
+ExportParser --> ChatEntity
+
+CommandHandler --> Analysis : analyze(chat data)
+Analysis --> ReportGen : build report
+
+ReportGen --> TgAPI : send text/Excel
+TgAPI --> TgClient
+TgClient --> User
+
+@enduml

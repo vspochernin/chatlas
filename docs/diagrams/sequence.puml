@@ -1,0 +1,49 @@
+@startuml sequence
+title Main flow (long polling + export processing, human-readable)
+
+actor User
+participant "Telegram Client" as TgClient
+participant "Telegram Bot API" as TgAPI
+participant "Chatlas bot\n(telegram module)" as Bot
+participant "ExportParser\n(parser)" as Parser
+participant "ChatAnalysisService\n(analysis)" as Analysis
+participant "ReportGenerator\n(export)" as ReportGen
+
+== Получение обновлений ==
+loop Постоянная проверка новых сообщений
+  Bot -> TgAPI : Запросить новые сообщения и файлы\nот пользователей
+  TgAPI --> Bot : Передать список новых событий\n(сообщения, файлы, команды)
+end
+
+== Пользователь отправляет файлы экспорта ==
+User -> TgClient : Написать боту и прикрепить\nфайл(ы) экспорта чата
+TgClient -> TgAPI : Отправить сообщение и файлы в Telegram
+... при следующей проверке обновлений ...
+Bot -> TgAPI : Запросить новые события\nдля этого бота
+TgAPI --> Bot : Передать событие с сообщением\nи ссылками на файлы экспорта
+
+== Загрузка и парсинг ==
+Bot -> TgAPI : Получить содержимое файла экспорта\nпо ссылке от Telegram
+TgAPI --> Bot : Вернуть файл экспорта
+
+Bot -> Parser : Преобразовать файл экспорта\nв структурированные данные о чате
+Parser --> Bot : Вернуть список сообщений,\nпользователей и параметров чата
+
+== Анализ и агрегирование ==
+Bot -> Analysis : Проанализировать чат и\nвыделить участников, упоминания, каналы
+Analysis --> Bot : Вернуть итоговые данные анализа\n(участники, упоминания, каналы)
+
+== Формирование результата ==
+alt Число участников меньше порогового значения
+  Bot -> TgAPI : Отправить пользователю\nтекстовый список участников
+  TgAPI -> TgClient : Доставить текстовый ответ бота
+  TgClient -> User : Показать список участников
+else Число участников равно или больше порога
+  Bot -> ReportGen : Сформировать таблицу Excel\nс участниками и связанными данными
+  ReportGen --> Bot : Вернуть готовый файл отчёта
+  Bot -> TgAPI : Отправить пользователю\nфайл отчёта Excel
+  TgAPI -> TgClient : Доставить файл Excel
+  TgClient -> User : Показать сообщение с файлом\nи предложить скачать отчёт
+end
+
+@enduml

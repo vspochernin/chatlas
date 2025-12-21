@@ -10,11 +10,11 @@ import ru.hackathon.chatlas.domain.ReportResult;
 public interface ReportRenderer {
 
     /**
-     * Отформатировать результат анализа в зависимости от количества сущностей.
+     * Отформатировать результат анализа: всегда создаёт и текстовый ответ, и Excel-файл.
      *
      * @param analysisResult результат анализа чата.
      * @param fileName имя исходного файла экспорта.
-     * @return результат в формате текста или Excel.
+     * @return результат, содержащий оба формата (текст и Excel) и recommendedType для выбора вывода.
      * @throws ReportRenderException если не удалось сформировать результат.
      */
     ReportResult render(ChatAnalysisResult analysisResult, String fileName) throws ReportRenderException;

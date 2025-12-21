@@ -31,16 +31,19 @@ package "domain" {
     + getTotalCount() : int
   }
 
-  enum ReportOutputType {
-    TEXT
-    EXCEL
+  abstract class ReportResult {
+    + fileName() : String
   }
 
-  class ReportResult {
-    + recommendedType : ReportOutputType
-    + text : String
-    + excelBytes : byte[]
-    + excelFileName : String
+  class ReportTextResult {
+    + fileName() : String
+    + text() : String
+  }
+
+  class ReportExcelResult {
+    + fileName() : String
+    + excelBytes() : byte[]
+    + excelFileName() : String
   }
 }
 
@@ -98,6 +101,7 @@ ChatAnalysisResult "1" o-- "*" Mention
 
 ReportRenderer --> ChatAnalysisResult
 ReportRenderer --> ReportResult : returns
-ReportResult --> ReportOutputType
+ReportResult <|-- ReportTextResult : extends
+ReportResult <|-- ReportExcelResult : extends
 
 @enduml

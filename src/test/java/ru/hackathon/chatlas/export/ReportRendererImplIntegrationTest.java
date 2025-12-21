@@ -6,8 +6,9 @@ import org.junit.jupiter.api.Test;
 import ru.hackathon.chatlas.analysis.ChatAnalyzerImpl;
 import ru.hackathon.chatlas.config.BotConfig;
 import ru.hackathon.chatlas.domain.ChatAnalysisResult;
-import ru.hackathon.chatlas.domain.ReportOutputType;
+import ru.hackathon.chatlas.domain.ReportExcelResult;
 import ru.hackathon.chatlas.domain.ReportResult;
+import ru.hackathon.chatlas.domain.ReportTextResult;
 import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.Mention;
 import ru.hackathon.chatlas.domain.Participant;
@@ -38,12 +39,12 @@ class ReportRendererImplIntegrationTest {
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
         // Должен быть текстовый ответ, так как totalCount = 4 < 50
-        assertEquals(ReportOutputType.TEXT, reportResult.recommendedType());
-        assertNotNull(reportResult.text());
-        assertNotNull(reportResult.excelBytes());
-        assertNotNull(reportResult.excelFileName());
+        assertInstanceOf(ReportTextResult.class, reportResult);
+        ReportTextResult textResult = (ReportTextResult) reportResult;
+        assertEquals("chat1.json", textResult.fileName());
+        assertNotNull(textResult.text());
 
-        String text = reportResult.text();
+        String text = textResult.text();
 
         // Проверяем заголовок с количеством
         assertTrue(text.contains("Количество участников: 2"));
@@ -71,14 +72,15 @@ class ReportRendererImplIntegrationTest {
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
         // Должен быть Excel, так как totalCount >= 51
-        assertEquals(ReportOutputType.EXCEL, reportResult.recommendedType());
-        assertNotNull(reportResult.text());
-        assertNotNull(reportResult.excelBytes());
-        assertNotNull(reportResult.excelFileName());
-        assertTrue(reportResult.excelFileName().endsWith(".xlsx"));
+        assertInstanceOf(ReportExcelResult.class, reportResult);
+        ReportExcelResult excelResult = (ReportExcelResult) reportResult;
+        assertEquals("chat1.json", excelResult.fileName());
+        assertNotNull(excelResult.excelBytes());
+        assertNotNull(excelResult.excelFileName());
+        assertTrue(excelResult.excelFileName().endsWith(".xlsx"));
 
         // Проверяем структуру Excel файла
-        try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(reportResult.excelBytes()))) {
+        try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             assertEquals(2, workbook.getNumberOfSheets());
 
             // Проверяем лист Participants
@@ -111,8 +113,9 @@ class ReportRendererImplIntegrationTest {
 
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
-        assertEquals(ReportOutputType.TEXT, reportResult.recommendedType());
-        assertNotNull(reportResult.text());
+        assertInstanceOf(ReportTextResult.class, reportResult);
+        ReportTextResult textResult = (ReportTextResult) reportResult;
+        assertNotNull(textResult.text());
     }
 
     @Test
@@ -125,8 +128,9 @@ class ReportRendererImplIntegrationTest {
 
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
-        assertEquals(ReportOutputType.EXCEL, reportResult.recommendedType());
-        assertNotNull(reportResult.excelBytes());
+        assertInstanceOf(ReportExcelResult.class, reportResult);
+        ReportExcelResult excelResult = (ReportExcelResult) reportResult;
+        assertNotNull(excelResult.excelBytes());
     }
 
     private String readResourceAsString(String resourceName) throws Exception {
@@ -147,4 +151,3 @@ class ReportRendererImplIntegrationTest {
                 .collect(java.util.stream.Collectors.toSet());
     }
 }
-

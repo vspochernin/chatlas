@@ -34,7 +34,8 @@ package "Chatlas Application" {
     [Mention] as Mention
     [ChatAnalysisResult] as AnalysisResult
     [ReportResult] as ReportResult
-    [ReportOutputType] as ReportOutputType
+    [ReportTextResult] as ReportTextResult
+    [ReportExcelResult] as ReportExcelResult
   }
 
   package "config" {
@@ -62,9 +63,10 @@ AnalysisResult --> Mention
 
 ProcessingService --> Renderer : render result
 Renderer --> ReportResult : returns
-ReportResult --> ReportOutputType
-Bot --> ReportResult : uses recommendedType
-Bot --> TgAPI : send text/Excel based on recommendedType
+ReportResult <|-- ReportTextResult : extends
+ReportResult <|-- ReportExcelResult : extends
+Bot --> ReportResult : uses instanceof
+Bot --> TgAPI : send text/Excel based on type
 TgAPI --> TgClient
 TgClient --> User
 

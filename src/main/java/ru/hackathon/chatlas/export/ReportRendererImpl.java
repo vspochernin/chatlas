@@ -6,8 +6,9 @@ import ru.hackathon.chatlas.config.BotConfig;
 import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 import ru.hackathon.chatlas.domain.Mention;
 import ru.hackathon.chatlas.domain.Participant;
-import ru.hackathon.chatlas.domain.ReportOutputType;
+import ru.hackathon.chatlas.domain.ReportExcelResult;
 import ru.hackathon.chatlas.domain.ReportResult;
+import ru.hackathon.chatlas.domain.ReportTextResult;
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
@@ -19,15 +20,18 @@ public class ReportRendererImpl implements ReportRenderer {
     @Override
     public ReportResult render(ChatAnalysisResult analysisResult, String fileName) throws ReportRenderException {
         try {
-            String text = renderText(analysisResult, fileName);
-            byte[] excelBytes = renderExcel(analysisResult, fileName);
-            String excelFileName = generateExcelFileName(fileName);
+            int totalCount = analysisResult.getTotalCount();
             
-            ReportOutputType recommendedType = analysisResult.getTotalCount() < BotConfig.EXCEL_THRESHOLD
-                    ? ReportOutputType.TEXT
-                    : ReportOutputType.EXCEL;
-            
-            return new ReportResult(recommendedType, text, excelBytes, excelFileName);
+            if (totalCount < BotConfig.EXCEL_THRESHOLD) {
+                // Генерируем только текстовый ответ
+                String text = renderText(analysisResult, fileName);
+                return new ReportTextResult(fileName, text);
+            } else {
+                // Генерируем только Excel-файл
+                byte[] excelBytes = renderExcel(analysisResult, fileName);
+                String excelFileName = generateExcelFileName(fileName);
+                return new ReportExcelResult(fileName, excelBytes, excelFileName);
+            }
         } catch (Exception e) {
             throw new ReportRenderException("Failed to render report", e);
         }

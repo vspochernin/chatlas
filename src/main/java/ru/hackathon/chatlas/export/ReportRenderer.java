@@ -4,17 +4,18 @@ import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 import ru.hackathon.chatlas.domain.ReportResult;
 
 /**
- * Сервис для форматирования результата анализа: текст или Excel.
+ * Сервис для форматирования результата анализа.
+ * Генерирует текстовый ответ или Excel-файл в зависимости от количества сущностей.
  *
  */
 public interface ReportRenderer {
 
     /**
-     * Отформатировать результат анализа: всегда создаёт и текстовый ответ, и Excel-файл.
+     * Отформатировать результат анализа: создаёт текстовый ответ или Excel-файл в зависимости от количества сущностей.
      *
      * @param analysisResult результат анализа чата.
      * @param fileName имя исходного файла экспорта.
-     * @return результат, содержащий оба формата (текст и Excel) и recommendedType для выбора вывода.
+     * @return результат форматирования (ReportTextResult или ReportExcelResult).
      * @throws ReportRenderException если не удалось сформировать результат.
      */
     ReportResult render(ChatAnalysisResult analysisResult, String fileName) throws ReportRenderException;

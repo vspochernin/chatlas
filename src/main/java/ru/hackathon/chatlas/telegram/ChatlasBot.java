@@ -13,8 +13,9 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.hackathon.chatlas.domain.RawChatFile;
-import ru.hackathon.chatlas.domain.ReportOutputType;
+import ru.hackathon.chatlas.domain.ReportExcelResult;
 import ru.hackathon.chatlas.domain.ReportResult;
+import ru.hackathon.chatlas.domain.ReportTextResult;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -160,11 +161,15 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             // Обрабатываем через сервис.
             ReportResult result = processingService.process(rawFile);
 
-            // Отправляем результат на основе recommendedType.
-            if (result.recommendedType() == ReportOutputType.EXCEL) {
-                sendExcelResult(chatId, result.excelBytes(), result.excelFileName());
-            } else {
-                sendTextResult(chatId, result.text());
+            // Отправляем результат в зависимости от типа через pattern matching (Java 21 switch expression).
+            switch (result) {
+                case ReportTextResult textResult -> sendTextResult(chatId, textResult.text());
+                case ReportExcelResult excelResult ->
+                        sendExcelResult(chatId, excelResult.excelBytes(), excelResult.excelFileName());
+                default -> {
+                    log.error("Unknown ReportResult type: {}", result.getClass());
+                    safeSendText(chatId, "Произошла ошибка при формировании результата.");
+                }
             }
 
             log.info("File {} processed successfully for chat {}", fileName, chatId);

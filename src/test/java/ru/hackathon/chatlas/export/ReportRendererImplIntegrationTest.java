@@ -39,10 +39,10 @@ class ReportRendererImplIntegrationTest {
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
         // Должен быть текстовый ответ, так как totalCount = 4 < 50
-        assertEquals(ReportOutputType.TEXT, reportResult.type());
+        assertEquals(ReportOutputType.TEXT, reportResult.recommendedType());
         assertNotNull(reportResult.text());
-        assertNull(reportResult.excelBytes());
-        assertNull(reportResult.excelFileName());
+        assertNotNull(reportResult.excelBytes());
+        assertNotNull(reportResult.excelFileName());
 
         String text = reportResult.text();
 
@@ -72,8 +72,8 @@ class ReportRendererImplIntegrationTest {
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
         // Должен быть Excel, так как totalCount >= 51
-        assertEquals(ReportOutputType.EXCEL, reportResult.type());
-        assertNull(reportResult.text());
+        assertEquals(ReportOutputType.EXCEL, reportResult.recommendedType());
+        assertNotNull(reportResult.text());
         assertNotNull(reportResult.excelBytes());
         assertNotNull(reportResult.excelFileName());
         assertTrue(reportResult.excelFileName().endsWith(".xlsx"));
@@ -112,7 +112,7 @@ class ReportRendererImplIntegrationTest {
 
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
-        assertEquals(ReportOutputType.TEXT, reportResult.type());
+        assertEquals(ReportOutputType.TEXT, reportResult.recommendedType());
         assertNotNull(reportResult.text());
     }
 
@@ -126,7 +126,7 @@ class ReportRendererImplIntegrationTest {
 
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
-        assertEquals(ReportOutputType.EXCEL, reportResult.type());
+        assertEquals(ReportOutputType.EXCEL, reportResult.recommendedType());
         assertNotNull(reportResult.excelBytes());
     }
 

@@ -29,10 +29,12 @@ class ReportRendererImplTest {
 
         ReportResult reportResult = renderer.render(result, "test.json");
 
-        assertEquals(ReportOutputType.TEXT, reportResult.type());
+        assertEquals(ReportOutputType.TEXT, reportResult.recommendedType());
         assertNotNull(reportResult.text());
-        assertNull(reportResult.excelBytes());
-        assertNull(reportResult.excelFileName());
+        assertNotNull(reportResult.excelBytes());
+        assertNotNull(reportResult.excelFileName());
+        assertTrue(reportResult.text().contains("Файл: test.json"));
+        assertTrue(reportResult.text().contains("Количество участников: 1"));
     }
 
     @Test
@@ -41,11 +43,12 @@ class ReportRendererImplTest {
 
         ReportResult reportResult = renderer.render(result, "test.json");
 
-        assertEquals(ReportOutputType.EXCEL, reportResult.type());
-        assertNull(reportResult.text());
+        assertEquals(ReportOutputType.EXCEL, reportResult.recommendedType());
+        assertNotNull(reportResult.text());
         assertNotNull(reportResult.excelBytes());
         assertNotNull(reportResult.excelFileName());
         assertTrue(reportResult.excelFileName().endsWith(".xlsx"));
+        assertTrue(reportResult.text().contains("Количество участников:"));
     }
 
     @Test
@@ -54,7 +57,7 @@ class ReportRendererImplTest {
 
         ReportResult reportResult = renderer.render(result, "test.json");
 
-        assertEquals(ReportOutputType.EXCEL, reportResult.type());
+        assertEquals(ReportOutputType.EXCEL, reportResult.recommendedType());
     }
 
     @Test
@@ -63,7 +66,7 @@ class ReportRendererImplTest {
 
         ReportResult reportResult = renderer.render(result, "test.json");
 
-        assertEquals(ReportOutputType.TEXT, reportResult.type());
+        assertEquals(ReportOutputType.TEXT, reportResult.recommendedType());
     }
 
     @Test
@@ -240,7 +243,7 @@ class ReportRendererImplTest {
 
         ReportResult reportResult = renderer.render(result, "test.json");
 
-        assertEquals(ReportOutputType.TEXT, reportResult.type());
+        assertEquals(ReportOutputType.TEXT, reportResult.recommendedType());
         String text = reportResult.text();
         assertTrue(text.contains("Количество участников: 0"));
         assertTrue(text.contains("Количество упоминаний: 1"));
@@ -255,7 +258,7 @@ class ReportRendererImplTest {
 
         ReportResult reportResult = renderer.render(result, "test.json");
 
-        assertEquals(ReportOutputType.TEXT, reportResult.type());
+        assertEquals(ReportOutputType.TEXT, reportResult.recommendedType());
         String text = reportResult.text();
         assertTrue(text.contains("Количество участников: 1"));
         assertTrue(text.contains("Количество упоминаний: 0"));
@@ -277,7 +280,7 @@ class ReportRendererImplTest {
 
         ReportResult reportResult = renderer.render(result, "test.json");
 
-        assertEquals(ReportOutputType.EXCEL, reportResult.type());
+        assertEquals(ReportOutputType.EXCEL, reportResult.recommendedType());
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(reportResult.excelBytes()))) {
             assertEquals(2, workbook.getNumberOfSheets());
             Sheet participantsSheet = workbook.getSheetAt(0);
@@ -294,7 +297,7 @@ class ReportRendererImplTest {
 
         ReportResult reportResult = renderer.render(result, "test.json");
 
-        assertEquals(ReportOutputType.EXCEL, reportResult.type());
+        assertEquals(ReportOutputType.EXCEL, reportResult.recommendedType());
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(reportResult.excelBytes()))) {
             assertEquals(2, workbook.getNumberOfSheets());
             Sheet mentionsSheet = workbook.getSheetAt(1);

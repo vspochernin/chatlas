@@ -160,8 +160,8 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             // Обрабатываем через сервис.
             ReportResult result = processingService.process(rawFile);
 
-            // Отправляем результат.
-            if (result.type() == ReportOutputType.EXCEL) {
+            // Отправляем результат на основе recommendedType.
+            if (result.recommendedType() == ReportOutputType.EXCEL) {
                 sendExcelResult(chatId, result.excelBytes(), result.excelFileName());
             } else {
                 sendTextResult(chatId, result.text());

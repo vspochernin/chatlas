@@ -19,16 +19,21 @@ public class ReportRendererImpl implements ReportRenderer {
     @Override
     public ReportResult render(ChatAnalysisResult analysisResult, String fileName) throws ReportRenderException {
         try {
-            if (analysisResult.getTotalCount() < BotConfig.EXCEL_THRESHOLD) {
-                return renderText(analysisResult, fileName);
-            }
-            return renderExcel(analysisResult, fileName);
+            String text = renderText(analysisResult, fileName);
+            byte[] excelBytes = renderExcel(analysisResult, fileName);
+            String excelFileName = generateExcelFileName(fileName);
+            
+            ReportOutputType recommendedType = analysisResult.getTotalCount() < BotConfig.EXCEL_THRESHOLD
+                    ? ReportOutputType.TEXT
+                    : ReportOutputType.EXCEL;
+            
+            return new ReportResult(recommendedType, text, excelBytes, excelFileName);
         } catch (Exception e) {
             throw new ReportRenderException("Failed to render report", e);
         }
     }
 
-    private ReportResult renderText(ChatAnalysisResult result, String fileName) {
+    private String renderText(ChatAnalysisResult result, String fileName) {
         StringBuilder sb = new StringBuilder();
         int participantsCount = result.getParticipantsCount();
         int mentionsCount = result.getMentionsCount();
@@ -53,15 +58,10 @@ public class ReportRendererImpl implements ReportRenderer {
             );
         }
 
-        return new ReportResult(
-                ReportOutputType.TEXT,
-                sb.toString(),
-                null,
-                null
-        );
+        return sb.toString();
     }
 
-    private ReportResult renderExcel(ChatAnalysisResult result, String fileName) throws Exception {
+    private byte[] renderExcel(ChatAnalysisResult result, String fileName) throws Exception {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheetMembers = workbook.createSheet("Chat Export Участники");
             Sheet sheetMentions = workbook.createSheet("Chat Export Упоминания");
@@ -80,17 +80,15 @@ public class ReportRendererImpl implements ReportRenderer {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
-
-            String baseFileName = fileName != null && !fileName.isBlank() 
-                    ? sanitizeFileName(fileName.replace(".json", ""))
-                    : "chat-export";
-            return new ReportResult(
-                    ReportOutputType.EXCEL,
-                    null,
-                    out.toByteArray(),
-                    baseFileName + "-" + LocalDate.now() + ".xlsx"
-            );
+            return out.toByteArray();
         }
+    }
+
+    private String generateExcelFileName(String fileName) {
+        String baseFileName = fileName != null && !fileName.isBlank() 
+                ? sanitizeFileName(fileName.replace(".json", ""))
+                : "chat-export";
+        return baseFileName + "-" + LocalDate.now() + ".xlsx";
     }
 
     private void createHeaderMembers(Sheet sheet) {

@@ -2,54 +2,66 @@ package ru.hackathon.chatlas.export;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import ru.hackathon.chatlas.config.BotConfig;
 import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 import ru.hackathon.chatlas.domain.Mention;
 import ru.hackathon.chatlas.domain.Participant;
+import ru.hackathon.chatlas.domain.ReportOutputType;
+import ru.hackathon.chatlas.domain.ReportResult;
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DefaultReportRenderer implements ReportRenderer {
-
-    private static final int TEXT_LIMIT = 50;
+public class ReportRendererImpl implements ReportRenderer {
 
     @Override
-    public ReportResult render(ChatAnalysisResult analysisResult) throws ReportRenderException {
+    public ReportResult render(ChatAnalysisResult analysisResult, String fileName) throws ReportRenderException {
         try {
-            if (analysisResult.getParticipantsCount() < TEXT_LIMIT) {
-                return renderText(analysisResult);
+            if (analysisResult.getTotalCount() < BotConfig.EXCEL_THRESHOLD) {
+                return renderText(analysisResult, fileName);
             }
-            return renderExcel(analysisResult);
+            return renderExcel(analysisResult, fileName);
         } catch (Exception e) {
             throw new ReportRenderException("Failed to render report", e);
         }
     }
 
-    private ReportResult renderText(ChatAnalysisResult result) {
+    private ReportResult renderText(ChatAnalysisResult result, String fileName) {
         StringBuilder sb = new StringBuilder();
-        sb.append("👥 Участники чата:\n\n");
+        int participantsCount = result.getParticipantsCount();
+        int mentionsCount = result.getMentionsCount();
 
+        sb.append("Файл: ").append(fileName).append("\n");
+        sb.append("Количество участников: ").append(participantsCount).append("\n");
+        sb.append("Количество упоминаний: ").append(mentionsCount).append("\n\n");
+
+        sb.append("Участники:\n");
         result.participants().forEach(p ->
                 sb.append("- ")
-                        .append(p.fromId())
-                        .append(p.displayName().isBlank() ? "" : " (" + p.displayName() + ")")
+                        .append(p.displayName())
                         .append("\n")
         );
 
-        sb.append("\n👥 Упоминания:\n\n");
+        if (mentionsCount > 0) {
+            sb.append("\nУпоминания:\n");
+            result.mentions().forEach(m ->
+                    sb.append("- ")
+                            .append(m.mentionText())
+                            .append("\n")
+            );
+        }
 
-        result.mentions().forEach(p ->
-                sb.append("- ")
-                        .append(p.mentionText())
-                        .append("\n")
+        return new ReportResult(
+                ReportOutputType.TEXT,
+                sb.toString(),
+                null,
+                null
         );
-
-        return new TextReportResult(sb.toString());
     }
 
-    private ReportResult renderExcel(ChatAnalysisResult result) throws Exception {
+    private ReportResult renderExcel(ChatAnalysisResult result, String fileName) throws Exception {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheetMembers = workbook.createSheet("Chat Export Участники");
             Sheet sheetMentions = workbook.createSheet("Chat Export Упоминания");
@@ -58,10 +70,10 @@ public class DefaultReportRenderer implements ReportRenderer {
             createHeaderMentions(sheetMentions);
 
             List<RowData> rowsMembers = collectRowsMembers(result);
-            writeRows(sheetMembers, rowsMembers);
+            writeRowsMembers(sheetMembers, rowsMembers);
 
             List<RowData> rowsMentions = collectRowsMentions(result);
-            writeRows(sheetMentions, rowsMentions);
+            writeRowsMentions(sheetMentions, rowsMentions);
 
             autosize(sheetMembers, 3);
             autosize(sheetMentions, 2);
@@ -69,9 +81,14 @@ public class DefaultReportRenderer implements ReportRenderer {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
 
-            return new ExcelReportResult(
+            String baseFileName = fileName != null && !fileName.isBlank() 
+                    ? sanitizeFileName(fileName.replace(".json", ""))
+                    : "chat-export";
+            return new ReportResult(
+                    ReportOutputType.EXCEL,
+                    null,
                     out.toByteArray(),
-                    "chat-export-" + LocalDate.now() + ".xlsx"
+                    baseFileName + "-" + LocalDate.now() + ".xlsx"
             );
         }
     }
@@ -95,7 +112,7 @@ public class DefaultReportRenderer implements ReportRenderer {
 
         String[] columns = {
                 "Дата экспорта",
-                "Ник в упоминании"
+                "Username"
         };
 
         for (int i = 0; i < columns.length; i++) {
@@ -135,7 +152,7 @@ public class DefaultReportRenderer implements ReportRenderer {
         return rows;
     }
 
-    private void writeRows(Sheet sheet, List<RowData> rows) {
+    private void writeRowsMembers(Sheet sheet, List<RowData> rows) {
         int rowIndex = 1;
         for (RowData data : rows) {
             Row row = sheet.createRow(rowIndex++);
@@ -146,10 +163,30 @@ public class DefaultReportRenderer implements ReportRenderer {
         }
     }
 
+    private void writeRowsMentions(Sheet sheet, List<RowData> rows) {
+        int rowIndex = 1;
+        for (RowData data : rows) {
+            Row row = sheet.createRow(rowIndex++);
+
+            row.createCell(0).setCellValue(data.exportDate);
+            row.createCell(1).setCellValue(data.username);
+        }
+    }
+
     private void autosize(Sheet sheet, int count) {
         for (int i = 0; i < count; i++) {
             sheet.autoSizeColumn(i);
         }
+    }
+
+    private String sanitizeFileName(String fileName) {
+        if (fileName == null) {
+            return "chat-export";
+        }
+        // Удаляем недопустимые символы для имени файла
+        return fileName.replaceAll("[^a-zA-Z0-9а-яА-ЯёЁ_\\-\\s]", "_")
+                .replaceAll("\\s+", "_")
+                .trim();
     }
 
     /* ================= DTO ================= */
@@ -160,63 +197,4 @@ public class DefaultReportRenderer implements ReportRenderer {
             String fullName
     ) {}
 
-    /* ================= RESULT IMPL ================= */
-
-    private static class TextReportResult implements ReportResult {
-        private final String text;
-
-        TextReportResult(String text) {
-            this.text = text;
-        }
-
-        @Override
-        public OutputType getType() {
-            return OutputType.TEXT;
-        }
-
-        @Override
-        public String getText() {
-            return text;
-        }
-
-        @Override
-        public byte[] getExcelBytes() {
-            return null;
-        }
-
-        @Override
-        public String getExcelFileName() {
-            return null;
-        }
-    }
-
-    private static class ExcelReportResult implements ReportResult {
-        private final byte[] bytes;
-        private final String filename;
-
-        ExcelReportResult(byte[] bytes, String filename) {
-            this.bytes = bytes;
-            this.filename = filename;
-        }
-
-        @Override
-        public OutputType getType() {
-            return OutputType.EXCEL;
-        }
-
-        @Override
-        public String getText() {
-            return null;
-        }
-
-        @Override
-        public byte[] getExcelBytes() {
-            return bytes;
-        }
-
-        @Override
-        public String getExcelFileName() {
-            return filename;
-        }
-    }
 }

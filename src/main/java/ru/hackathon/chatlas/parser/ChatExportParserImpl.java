@@ -8,11 +8,11 @@ import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.RawChatFile;
 
 @Slf4j
-public class JacksonChatExportParserImpl implements ChatExportParser {
+public class ChatExportParserImpl implements ChatExportParser {
 
     private final ObjectMapper objectMapper;
 
-    public JacksonChatExportParserImpl() {
+    public ChatExportParserImpl() {
         this.objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -13,7 +13,8 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.hackathon.chatlas.domain.RawChatFile;
-import ru.hackathon.chatlas.export.ReportRenderer;
+import ru.hackathon.chatlas.domain.ReportOutputType;
+import ru.hackathon.chatlas.domain.ReportResult;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -157,13 +158,13 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             safeSendText(chatId, "Обрабатываю файл \"" + fileName + "\"...");
 
             // Обрабатываем через сервис.
-            ReportRenderer.ReportResult result = processingService.process(rawFile);
+            ReportResult result = processingService.process(rawFile);
 
             // Отправляем результат.
-            if (result.getType() == ReportRenderer.OutputType.EXCEL) {
-                sendExcelResult(chatId, result.getExcelBytes(), result.getExcelFileName());
+            if (result.type() == ReportOutputType.EXCEL) {
+                sendExcelResult(chatId, result.excelBytes(), result.excelFileName());
             } else {
-                sendTextResult(chatId, result.getText());
+                sendTextResult(chatId, result.text());
             }
 
             log.info("File {} processed successfully for chat {}", fileName, chatId);

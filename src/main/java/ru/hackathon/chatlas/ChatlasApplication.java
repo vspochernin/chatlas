@@ -5,10 +5,10 @@ import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.hackathon.chatlas.analysis.ChatAnalyzer;
 import ru.hackathon.chatlas.analysis.ChatAnalyzerImpl;
-import ru.hackathon.chatlas.export.DefaultReportRenderer;
 import ru.hackathon.chatlas.export.ReportRenderer;
+import ru.hackathon.chatlas.export.ReportRendererImpl;
 import ru.hackathon.chatlas.parser.ChatExportParser;
-import ru.hackathon.chatlas.parser.JacksonChatExportParserImpl;
+import ru.hackathon.chatlas.parser.ChatExportParserImpl;
 import ru.hackathon.chatlas.telegram.ChatlasBot;
 import ru.hackathon.chatlas.telegram.ChatProcessingService;
 
@@ -23,9 +23,9 @@ public class ChatlasApplication {
         }
 
         try {
-            ChatExportParser parser = new JacksonChatExportParserImpl();
+            ChatExportParser parser = new ChatExportParserImpl();
             ChatAnalyzer analyzer = new ChatAnalyzerImpl();
-            ReportRenderer renderer = new DefaultReportRenderer();
+            ReportRenderer renderer = new ReportRendererImpl();
 
             ChatProcessingService processingService = new ChatProcessingService(parser, analyzer, renderer);
             ChatlasBot bot = new ChatlasBot(botToken, processingService);

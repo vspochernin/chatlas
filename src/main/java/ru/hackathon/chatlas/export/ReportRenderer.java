@@ -1,6 +1,7 @@
 package ru.hackathon.chatlas.export;
 
 import ru.hackathon.chatlas.domain.ChatAnalysisResult;
+import ru.hackathon.chatlas.domain.ReportResult;
 
 /**
  * Сервис для форматирования результата анализа: текст или Excel.
@@ -12,43 +13,11 @@ public interface ReportRenderer {
      * Отформатировать результат анализа в зависимости от количества сущностей.
      *
      * @param analysisResult результат анализа чата.
+     * @param fileName имя исходного файла экспорта.
      * @return результат в формате текста или Excel.
      * @throws ReportRenderException если не удалось сформировать результат.
      */
-    ReportResult render(ChatAnalysisResult analysisResult) throws ReportRenderException;
-
-    /**
-     * Результат форматирования отчета.
-     */
-    enum OutputType {
-        TEXT,
-        EXCEL
-    }
-
-    /**
-     * Результат форматирования.
-     */
-    interface ReportResult {
-        /**
-         * @return тип результата (TEXT или EXCEL).
-         */
-        OutputType getType();
-
-        /**
-         * @return текст для отправки в чат (null, если getType() == EXCEL).
-         */
-        String getText();
-
-        /**
-         * @return данные Excel в виде байтов (null, если getType() == TEXT).
-         */
-        byte[] getExcelBytes();
-
-        /**
-         * @return имя файла Excel (null, если getType() == TEXT).
-         */
-        String getExcelFileName();
-    }
+    ReportResult render(ChatAnalysisResult analysisResult, String fileName) throws ReportRenderException;
 
     /**
      * Исключение при форматировании отчета.

@@ -3,69 +3,76 @@ title Chatlas class diagram (high level)
 
 package "domain" {
   class RawChatFile {
-    - id : String
-    - fileName : String
-    - content : byte[]
-    - contentType : String
+    + fileName : String
+    + jsonContent : String
   }
 
   class ChatExport {
-    - chatId : String
-    - chatTitle : String
-    - messages : List<Object>
+    + name : String
+    + type : String
+    + id : Long
+    + messages : List<Message>
   }
 
   class Participant {
-    - userId : String
-    - displayName : String
-    - username : String
-    - hasChannel : boolean
-    - registeredAt : java.time.Instant
+    + fromId : String
+    + displayName : String
   }
 
   class Mention {
-    - fromUserId : String
-    - mentionedUserId : String
-    - messageId : String
+    + mentionText : String
   }
 
   class ChatAnalysisResult {
-    - participants : List<Participant>
-    - mentions : List<Mention>
-    - channels : List<String>
+    + participants : Set<Participant>
+    + mentions : Set<Mention>
+    + getParticipantsCount() : int
+    + getMentionsCount() : int
+    + getTotalCount() : int
+  }
+
+  enum ReportOutputType {
+    TEXT
+    EXCEL
+  }
+
+  class ReportResult {
+    + type : ReportOutputType
+    + text : String
+    + excelBytes : byte[]
+    + excelFileName : String
   }
 }
 
 package "telegram" {
   class ChatlasBot {
-    +onUpdateReceived(update)
-    +getBotUsername() : String
-    +getBotToken() : String
+    +consume(update : Update)
   }
 
   class ChatProcessingService {
-    +processUpdate(update)
-    +processFiles(files)
+    +process(file : RawChatFile) : ReportResult
   }
 }
 
 package "parser" {
-  class ExportParser {
-    +parse(rawFile : RawChatFile) : ChatExport
+  interface ChatExportParser {
+    +parse(file : RawChatFile) : ChatExport
   }
+  class ChatExportParserImpl
 }
 
 package "analysis" {
-  class ChatAnalysisService {
+  interface ChatAnalyzer {
     +analyze(export : ChatExport) : ChatAnalysisResult
   }
+  class ChatAnalyzerImpl
 }
 
 package "export" {
-  class ReportGenerator {
-    +generateText(result : ChatAnalysisResult) : String
-    +generateExcel(result : ChatAnalysisResult) : byte[]
+  interface ReportRenderer {
+    +render(result : ChatAnalysisResult, fileName : String) : ReportResult
   }
+  class ReportRendererImpl
 }
 
 class ChatlasApplication {
@@ -77,16 +84,20 @@ class ChatlasApplication {
 ChatlasApplication --> ChatlasBot
 ChatlasBot --> ChatProcessingService
 
-ChatProcessingService --> ExportParser
-ChatProcessingService --> ChatAnalysisService
-ChatProcessingService --> ReportGenerator
+ChatProcessingService --> ChatExportParser
+ChatProcessingService --> ChatAnalyzer
+ChatProcessingService --> ReportRenderer
 
-ExportParser --> RawChatFile
-ExportParser --> ChatExport
+ChatExportParser --> RawChatFile
+ChatExportParser --> ChatExport
 
-ChatAnalysisService --> ChatExport
-ChatAnalysisService --> ChatAnalysisResult
+ChatAnalyzer --> ChatExport
+ChatAnalyzer --> ChatAnalysisResult
 ChatAnalysisResult "1" o-- "*" Participant
 ChatAnalysisResult "1" o-- "*" Mention
+
+ReportRenderer --> ChatAnalysisResult
+ReportRenderer --> ReportResult : returns
+ReportResult --> ReportOutputType
 
 @enduml

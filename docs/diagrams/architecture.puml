@@ -11,26 +11,28 @@ package "Chatlas Application" {
   [ChatlasApplication] as App
 
   package "telegram" {
-    [UpdateHandler] as UpdateHandler
-    [CommandHandler] as CommandHandler
+    [ChatlasBot] as Bot
+    [ChatProcessingService] as ProcessingService
   }
 
   package "parser" {
-    [ExportParser] as ExportParser
+    [ChatExportParser] as Parser
   }
 
   package "analysis" {
-    [ChatAnalysisService] as Analysis
+    [ChatAnalyzer] as Analyzer
   }
 
   package "export" {
-    [ReportGenerator] as ReportGen
+    [ReportRenderer] as Renderer
   }
 
   package "domain" {
-    [UserEntity] as UserEntity
-    [ChatEntity] as ChatEntity
-    [MessageEntity] as MessageEntity
+    [RawChatFile] as RawFile
+    [ChatExport] as ChatExport
+    [Participant] as Participant
+    [Mention] as Mention
+    [ChatAnalysisResult] as AnalysisResult
   }
 
   package "config" {
@@ -43,19 +45,21 @@ TgClient --> TgAPI
 TgAPI --> UpdateHandler : updates
 
 App --> BotConfig
-App --> UpdateHandler
+App --> Bot
 
-UpdateHandler --> CommandHandler : commands/messages
-UpdateHandler --> ExportParser : files (export)
+Bot --> ProcessingService : process file
 
-ExportParser --> MessageEntity
-ExportParser --> UserEntity
-ExportParser --> ChatEntity
+ProcessingService --> Parser : parse file
+Parser --> ChatExport
+Parser --> RawFile
 
-CommandHandler --> Analysis : analyze(chat data)
-Analysis --> ReportGen : build report
+ProcessingService --> Analyzer : analyze export
+Analyzer --> AnalysisResult
+AnalysisResult --> Participant
+AnalysisResult --> Mention
 
-ReportGen --> TgAPI : send text/Excel
+ProcessingService --> Renderer : render result
+Renderer --> TgAPI : send text/Excel
 TgAPI --> TgClient
 TgClient --> User
 

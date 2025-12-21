@@ -6,9 +6,9 @@ participant "Telegram Client" as TgClient
 participant "Telegram Bot API" as TgAPI
 participant "Chatlas bot\n(telegram module)" as Bot
 participant "ChatProcessingService\n(telegram)" as ProcessingService
-participant "ExportParser\n(parser)" as Parser
-participant "ChatAnalysisService\n(analysis)" as Analysis
-participant "ReportGenerator\n(export)" as ReportGen
+participant "ChatExportParser\n(parser)" as Parser
+participant "ChatAnalyzer\n(analysis)" as Analyzer
+participant "ReportRenderer\n(export)" as Renderer
 
 == Получение обновлений ==
 loop Постоянная проверка новых сообщений
@@ -32,18 +32,26 @@ ProcessingService -> Parser : Преобразовать файл экспорт
 Parser --> ProcessingService : Вернуть ChatExport
 
 == Анализ и агрегирование ==
-ProcessingService -> Analysis : Проанализировать чат и\nвыделить участников и упоминания
-Analysis --> ProcessingService : Вернуть ChatAnalysisResult
+ProcessingService -> Analyzer : Проанализировать чат и\nвыделить участников и упоминания
+Analyzer --> ProcessingService : Вернуть ChatAnalysisResult
 
 == Формирование результата ==
-ProcessingService -> ReportGen : Сформировать отчет\n(текст или Excel в зависимости от количества)
-ReportGen --> ProcessingService : Вернуть ReportResult\n(ReportTextResult или ReportExcelResult)
-ProcessingService --> Bot : Вернуть ReportResult
+ProcessingService -> Renderer : Сформировать отчет\n(проверка количества сущностей)
 alt Общее число сущностей (участники + упоминания) <= 50
+  Renderer -> Renderer : Создать ReportTextResult
+else Общее число сущностей >= 51
+  Renderer -> Renderer : Создать ReportExcelResult
+end
+Renderer --> ProcessingService : Вернуть ReportResult\n(ReportTextResult или ReportExcelResult)
+ProcessingService --> Bot : Вернуть ReportResult
+
+== Отправка результата ==
+Bot -> Bot : Проверить тип результата\n(pattern matching)
+alt ReportResult является ReportTextResult
   Bot -> TgAPI : Отправить пользователю\nтекстовый список участников
   TgAPI -> TgClient : Доставить текстовый ответ бота
   TgClient -> User : Показать список участников
-else Общее число сущностей >= 51
+else ReportResult является ReportExcelResult
   Bot -> TgAPI : Отправить пользователю\nфайл отчёта Excel
   TgAPI -> TgClient : Доставить файл Excel
   TgClient -> User : Показать сообщение с файлом\nи предложить скачать отчёт

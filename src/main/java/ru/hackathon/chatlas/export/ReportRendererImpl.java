@@ -23,11 +23,11 @@ public class ReportRendererImpl implements ReportRenderer {
             int totalCount = analysisResult.getTotalCount();
 
             if (totalCount < BotConfig.EXCEL_THRESHOLD) {
-                // Генерируем только текстовый ответ
+                // Генерируем только текстовый ответ.
                 String text = renderText(analysisResult, fileName);
                 return new ReportTextResult(fileName, text);
             } else {
-                // Генерируем только Excel-файл
+                // Генерируем только Excel-файл.
                 byte[] excelBytes = renderExcel(analysisResult, fileName);
                 String excelFileName = generateExcelFileName(fileName);
                 return new ReportExcelResult(fileName, excelBytes, excelFileName);
@@ -126,7 +126,7 @@ public class ReportRendererImpl implements ReportRenderer {
         List<RowData> rows = new ArrayList<>();
         LocalDate exportDate = LocalDate.now();
 
-        // Участники
+        // Участники.
         for (Participant p : result.participants()) {
             rows.add(new RowData(
                     exportDate.toString(),
@@ -142,7 +142,7 @@ public class ReportRendererImpl implements ReportRenderer {
         List<RowData> rows = new ArrayList<>();
         LocalDate exportDate = LocalDate.now();
 
-        // Упоминания
+        // Упоминания.
         for (Mention m : result.mentions()) {
             rows.add(new RowData(
                     exportDate.toString(),
@@ -185,7 +185,7 @@ public class ReportRendererImpl implements ReportRenderer {
         if (fileName == null) {
             return "chat-export";
         }
-        // Удаляем недопустимые символы для имени файла
+        // Удаляем недопустимые символы для имени файла.
         return fileName.replaceAll("[^a-zA-Z0-9а-яА-ЯёЁ_\\-\\s]", "_")
                 .replaceAll("\\s+", "_")
                 .trim();

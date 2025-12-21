@@ -14,6 +14,20 @@ package "domain" {
     + messages : List<Message>
   }
 
+  class Message {
+    + id : Long
+    + type : String
+    + date : Instant
+    + from : String
+    + fromId : String
+    + textEntities : List<TextEntity>
+  }
+
+  class TextEntity {
+    + type : String
+    + text : String
+  }
+
   class Participant {
     + fromId : String
     + displayName : String
@@ -93,6 +107,9 @@ ChatProcessingService --> ReportRenderer
 
 ChatExportParser --> RawChatFile
 ChatExportParser --> ChatExport
+
+ChatExport "1" *-- "*" Message : contains
+Message "1" *-- "*" TextEntity : contains
 
 ChatAnalyzer --> ChatExport
 ChatAnalyzer --> ChatAnalysisResult

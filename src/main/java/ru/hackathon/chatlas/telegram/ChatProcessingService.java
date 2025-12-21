@@ -44,7 +44,7 @@ public class ChatProcessingService {
             // 2. Анализируем и извлекаем участников/упоминания.
             ChatAnalysisResult analysisResult = analyzer.analyze(chatExport);
 
-            // 3. Форматируем результат в (текст или Excel).
+            // 3. Форматируем результат (текст или Excel).
             return renderer.render(analysisResult, file.fileName());
 
         } catch (ChatExportParser.ChatExportParseException e) {

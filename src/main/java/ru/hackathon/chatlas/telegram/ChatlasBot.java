@@ -199,7 +199,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         if (text.length() <= 4096) {
             safeSendText(chatId, text);
         } else {
-            // Разбиваем на части
+            // Разбиваем на части.
             int offset = 0;
             while (offset < text.length()) {
                 int endIndex = Math.min(offset + 4000, text.length());

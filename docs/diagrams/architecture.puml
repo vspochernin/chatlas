@@ -65,7 +65,7 @@ ProcessingService --> Renderer : render result
 Renderer --> ReportResult : returns
 ReportResult <|-- ReportTextResult : extends
 ReportResult <|-- ReportExcelResult : extends
-Bot --> ReportResult : uses instanceof
+Bot --> ReportResult : uses switch expression\n(pattern matching)
 Bot --> TgAPI : send text/Excel based on type
 TgAPI --> TgClient
 TgClient --> User

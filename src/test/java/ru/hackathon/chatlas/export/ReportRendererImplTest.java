@@ -111,7 +111,7 @@ class ReportRendererImplTest {
         String text = textResult.text();
 
         assertTrue(text.contains("Участники:"));
-        assertTrue(text.contains("- \n")); // Пустое имя
+        assertTrue(text.contains("- \n")); // Пустое имя.
     }
 
     @Test
@@ -127,7 +127,7 @@ class ReportRendererImplTest {
         String text = textResult.text();
 
         assertTrue(text.contains("Участники:"));
-        assertFalse(text.contains("Упоминания:")); // Не должно быть секции упоминаний
+        assertFalse(text.contains("Упоминания:")); // Не должно быть секции упоминаний.
     }
 
     @Test
@@ -140,8 +140,8 @@ class ReportRendererImplTest {
 
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             assertEquals(2, workbook.getNumberOfSheets());
-            assertEquals("Chat Export Участники", workbook.getSheetAt(0).getSheetName());
-            assertEquals("Chat Export Упоминания", workbook.getSheetAt(1).getSheetName());
+            assertEquals("Участники", workbook.getSheetAt(0).getSheetName());
+            assertEquals("Упоминания", workbook.getSheetAt(1).getSheetName());
         }
     }
 
@@ -177,7 +177,7 @@ class ReportRendererImplTest {
 
             assertEquals("Дата экспорта", headerRow.getCell(0).getStringCellValue());
             assertEquals("Username", headerRow.getCell(1).getStringCellValue());
-            assertEquals(2, headerRow.getLastCellNum()); // Только 2 колонки
+            assertEquals(2, headerRow.getLastCellNum()); // 2 колонки: Дата экспорта, Username.
         }
     }
 
@@ -199,11 +199,11 @@ class ReportRendererImplTest {
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             Sheet participantsSheet = workbook.getSheetAt(0);
 
-            assertEquals(3, participantsSheet.getLastRowNum() + 1); // Header + 2 rows
+            assertEquals(3, participantsSheet.getLastRowNum() + 1); // Header + 2 rows.
             Row row1 = participantsSheet.getRow(1);
             Row row2 = participantsSheet.getRow(2);
 
-            // Проверяем, что обе строки содержат правильные данные (порядок может быть любым)
+            // Проверяем, что обе строки содержат правильные данные (порядок может быть любым).
             java.util.Set<String> userIds = new java.util.HashSet<>();
             java.util.Set<String> names = new java.util.HashSet<>();
             userIds.add(row1.getCell(1).getStringCellValue());
@@ -238,19 +238,19 @@ class ReportRendererImplTest {
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             Sheet mentionsSheet = workbook.getSheetAt(1);
 
-            assertEquals(3, mentionsSheet.getLastRowNum() + 1); // Header + 2 rows
+            assertEquals(3, mentionsSheet.getLastRowNum() + 1); // Header + 2 rows.
             Row row1 = mentionsSheet.getRow(1);
             Row row2 = mentionsSheet.getRow(2);
 
-            // Проверяем, что обе строки содержат правильные данные (порядок может быть любым)
+            // Проверяем, что обе строки содержат правильные данные (порядок может быть любым).
             java.util.Set<String> mentions = new java.util.HashSet<>();
             mentions.add(row1.getCell(1).getStringCellValue());
             mentions.add(row2.getCell(1).getStringCellValue());
 
             assertEquals(today.toString(), row1.getCell(0).getStringCellValue());
             assertEquals(today.toString(), row2.getCell(0).getStringCellValue());
-            assertEquals(2, row1.getLastCellNum()); // Только 2 колонки
-            assertEquals(2, row2.getLastCellNum()); // Только 2 колонки
+            assertEquals(2, row1.getLastCellNum()); // 2 колонки: Дата экспорта, Username
+            assertEquals(2, row2.getLastCellNum()); // 2 колонки: Дата экспорта, Username
             assertTrue(mentions.contains("@username1"));
             assertTrue(mentions.contains("@username2"));
         }
@@ -329,7 +329,7 @@ class ReportRendererImplTest {
         }
     }
 
-    // Helper methods
+    // Вспомогательные методы.
 
     private ChatAnalysisResult createLargeResult(int totalCount) {
         int half = totalCount / 2;

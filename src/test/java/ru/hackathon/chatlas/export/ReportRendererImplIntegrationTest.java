@@ -38,7 +38,7 @@ class ReportRendererImplIntegrationTest {
         ChatAnalysisResult analysisResult = analyzer.analyze(chatExport);
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
-        // Должен быть текстовый ответ, так как totalCount = 4 < 50
+        // Должен быть текстовый ответ, так как totalCount = 4 < 50.
         assertInstanceOf(ReportTextResult.class, reportResult);
         ReportTextResult textResult = (ReportTextResult) reportResult;
         assertEquals("chat1.json", textResult.fileName());
@@ -46,16 +46,16 @@ class ReportRendererImplIntegrationTest {
 
         String text = textResult.text();
 
-        // Проверяем заголовок с количеством
+        // Проверяем заголовок с количеством.
         assertTrue(text.contains("Количество участников: 2"));
         assertTrue(text.contains("Количество упоминаний: 2"));
 
-        // Проверяем участников
+        // Проверяем участников.
         assertTrue(text.contains("Участники:"));
         assertTrue(text.contains("Владислав Почернин"));
         assertTrue(text.contains("Егор Мартынов"));
 
-        // Проверяем упоминания
+        // Проверяем упоминания.
         assertTrue(text.contains("Упоминания:"));
         assertTrue(text.contains("@vspochernin"));
         assertTrue(text.contains("@vspocherninwork"));
@@ -63,7 +63,7 @@ class ReportRendererImplIntegrationTest {
 
     @Test
     void shouldRenderExcelForLargeChatExport() throws Exception {
-        // Создаем большой набор данных, чтобы превысить порог
+        // Создаем большой набор данных, чтобы превысить порог.
         ChatAnalysisResult analysisResult = new ChatAnalysisResult(
                 createParticipants(BotConfig.EXCEL_THRESHOLD / 2 + 1),
                 createMentions(BotConfig.EXCEL_THRESHOLD / 2 + 1)
@@ -71,7 +71,7 @@ class ReportRendererImplIntegrationTest {
 
         ReportResult reportResult = renderer.render(analysisResult, "chat1.json");
 
-        // Должен быть Excel, так как totalCount >= 51
+        // Должен быть Excel, так как totalCount >= 51.
         assertInstanceOf(ReportExcelResult.class, reportResult);
         ReportExcelResult excelResult = (ReportExcelResult) reportResult;
         assertEquals("chat1.json", excelResult.fileName());
@@ -79,22 +79,22 @@ class ReportRendererImplIntegrationTest {
         assertNotNull(excelResult.excelFileName());
         assertTrue(excelResult.excelFileName().endsWith(".xlsx"));
 
-        // Проверяем структуру Excel файла
+        // Проверяем структуру Excel файла.
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             assertEquals(2, workbook.getNumberOfSheets());
 
-            // Проверяем лист Participants
+            // Проверяем лист Participants.
             Sheet participantsSheet = workbook.getSheetAt(0);
-            assertEquals("Chat Export Участники", participantsSheet.getSheetName());
+            assertEquals("Участники", participantsSheet.getSheetName());
             Row headerRow = participantsSheet.getRow(0);
             assertEquals("Дата экспорта", headerRow.getCell(0).getStringCellValue());
             assertEquals("UserId", headerRow.getCell(1).getStringCellValue());
             assertEquals("Имя и фамилия", headerRow.getCell(2).getStringCellValue());
             assertTrue(participantsSheet.getLastRowNum() >= BotConfig.EXCEL_THRESHOLD / 2);
 
-            // Проверяем лист Mentions
+            // Проверяем лист Mentions.
             Sheet mentionsSheet = workbook.getSheetAt(1);
-            assertEquals("Chat Export Упоминания", mentionsSheet.getSheetName());
+            assertEquals("Упоминания", mentionsSheet.getSheetName());
             Row mentionsHeaderRow = mentionsSheet.getRow(0);
             assertEquals("Дата экспорта", mentionsHeaderRow.getCell(0).getStringCellValue());
             assertEquals("Username", mentionsHeaderRow.getCell(1).getStringCellValue());
@@ -105,7 +105,7 @@ class ReportRendererImplIntegrationTest {
 
     @Test
     void shouldRenderTextWhenExactlyOneLessThanThreshold() throws Exception {
-        // Создаем результат с totalCount = 50 (порог - 1)
+        // Создаем результат с totalCount = 50 (порог - 1).
         ChatAnalysisResult analysisResult = new ChatAnalysisResult(
                 createParticipants(BotConfig.EXCEL_THRESHOLD - 1),
                 Set.of()
@@ -120,7 +120,7 @@ class ReportRendererImplIntegrationTest {
 
     @Test
     void shouldRenderExcelWhenExactlyAtThreshold() throws Exception {
-        // Создаем результат с totalCount = 51 (порог)
+        // Создаем результат с totalCount = 51 (порог).
         ChatAnalysisResult analysisResult = new ChatAnalysisResult(
                 createParticipants(BotConfig.EXCEL_THRESHOLD),
                 Set.of()

@@ -67,8 +67,8 @@ public class ReportRendererImpl implements ReportRenderer {
 
     private byte[] renderExcel(ChatAnalysisResult result, String fileName) throws Exception {
         try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheetMembers = workbook.createSheet("Chat Export Участники");
-            Sheet sheetMentions = workbook.createSheet("Chat Export Упоминания");
+            Sheet sheetMembers = workbook.createSheet("Участники");
+            Sheet sheetMentions = workbook.createSheet("Упоминания");
 
             createHeaderMembers(sheetMembers);
             createHeaderMentions(sheetMentions);

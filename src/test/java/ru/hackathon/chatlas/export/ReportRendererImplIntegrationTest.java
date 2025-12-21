@@ -12,7 +12,6 @@ import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.Mention;
 import ru.hackathon.chatlas.domain.Participant;
 import ru.hackathon.chatlas.domain.RawChatFile;
-import ru.hackathon.chatlas.export.ReportRendererImpl;
 import ru.hackathon.chatlas.parser.ChatExportParserImpl;
 
 import java.io.ByteArrayInputStream;

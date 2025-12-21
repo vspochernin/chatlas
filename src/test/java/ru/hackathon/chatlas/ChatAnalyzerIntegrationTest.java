@@ -7,7 +7,6 @@ import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.Mention;
 import ru.hackathon.chatlas.domain.Participant;
 import ru.hackathon.chatlas.parser.ChatExportParserImpl;
-import ru.hackathon.chatlas.parser.ChatExportParser.ChatExportParseException;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

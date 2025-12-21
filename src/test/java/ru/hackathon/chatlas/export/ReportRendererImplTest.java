@@ -137,7 +137,7 @@ class ReportRendererImplTest {
         ReportResult reportResult = renderer.render(result, "test.json");
         assertInstanceOf(ReportExcelResult.class, reportResult);
         ReportExcelResult excelResult = (ReportExcelResult) reportResult;
-        
+
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             assertEquals(2, workbook.getNumberOfSheets());
             assertEquals("Chat Export Участники", workbook.getSheetAt(0).getSheetName());
@@ -152,7 +152,7 @@ class ReportRendererImplTest {
         ReportResult reportResult = renderer.render(result, "test.json");
         assertInstanceOf(ReportExcelResult.class, reportResult);
         ReportExcelResult excelResult = (ReportExcelResult) reportResult;
-        
+
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             Sheet participantsSheet = workbook.getSheetAt(0);
             Row headerRow = participantsSheet.getRow(0);
@@ -170,7 +170,7 @@ class ReportRendererImplTest {
         ReportResult reportResult = renderer.render(result, "test.json");
         assertInstanceOf(ReportExcelResult.class, reportResult);
         ReportExcelResult excelResult = (ReportExcelResult) reportResult;
-        
+
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             Sheet mentionsSheet = workbook.getSheetAt(1);
             Row headerRow = mentionsSheet.getRow(0);
@@ -195,7 +195,7 @@ class ReportRendererImplTest {
         ReportResult reportResult = renderer.render(result, "test.json");
         assertInstanceOf(ReportExcelResult.class, reportResult);
         ReportExcelResult excelResult = (ReportExcelResult) reportResult;
-        
+
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             Sheet participantsSheet = workbook.getSheetAt(0);
 
@@ -234,7 +234,7 @@ class ReportRendererImplTest {
         ReportResult reportResult = renderer.render(result, "test.json");
         assertInstanceOf(ReportExcelResult.class, reportResult);
         ReportExcelResult excelResult = (ReportExcelResult) reportResult;
-        
+
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             Sheet mentionsSheet = workbook.getSheetAt(1);
 
@@ -303,7 +303,7 @@ class ReportRendererImplTest {
         ReportResult reportResult = renderer.render(result, "test.json");
         assertInstanceOf(ReportExcelResult.class, reportResult);
         ReportExcelResult excelResult = (ReportExcelResult) reportResult;
-        
+
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             assertEquals(2, workbook.getNumberOfSheets());
             Sheet participantsSheet = workbook.getSheetAt(0);
@@ -321,7 +321,7 @@ class ReportRendererImplTest {
         ReportResult reportResult = renderer.render(result, "test.json");
         assertInstanceOf(ReportExcelResult.class, reportResult);
         ReportExcelResult excelResult = (ReportExcelResult) reportResult;
-        
+
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(excelResult.excelBytes()))) {
             assertEquals(2, workbook.getNumberOfSheets());
             Sheet mentionsSheet = workbook.getSheetAt(1);

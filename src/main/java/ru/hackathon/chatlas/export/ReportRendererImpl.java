@@ -21,7 +21,7 @@ public class ReportRendererImpl implements ReportRenderer {
     public ReportResult render(ChatAnalysisResult analysisResult, String fileName) throws ReportRenderException {
         try {
             int totalCount = analysisResult.getTotalCount();
-            
+
             if (totalCount < BotConfig.EXCEL_THRESHOLD) {
                 // Генерируем только текстовый ответ
                 String text = renderText(analysisResult, fileName);
@@ -89,7 +89,7 @@ public class ReportRendererImpl implements ReportRenderer {
     }
 
     private String generateExcelFileName(String fileName) {
-        String baseFileName = fileName != null && !fileName.isBlank() 
+        String baseFileName = fileName != null && !fileName.isBlank()
                 ? sanitizeFileName(fileName.replace(".json", ""))
                 : "chat-export";
         return baseFileName + "-" + LocalDate.now() + ".xlsx";

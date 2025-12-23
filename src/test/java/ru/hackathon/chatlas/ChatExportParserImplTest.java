@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.RawChatFile;
 import ru.hackathon.chatlas.parser.ChatExportParser.ChatExportParseException;
-import ru.hackathon.chatlas.parser.JacksonChatExportParserImpl;
+import ru.hackathon.chatlas.parser.ChatExportParserImpl;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -12,13 +12,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JacksonChatExportParserTest {
+class ChatExportParserImplTest {
 
     @Test
     void shouldParseRealChatJson() throws Exception {
         String jsonContent = readResourceAsString("chat1.json");
         RawChatFile file = new RawChatFile("chat1.json", jsonContent);
-        JacksonChatExportParserImpl parser = new JacksonChatExportParserImpl();
+        ChatExportParserImpl parser = new ChatExportParserImpl();
 
         ChatExport result = parser.parse(file);
 
@@ -36,7 +36,7 @@ class JacksonChatExportParserTest {
     void shouldParseMessagesCorrectly() throws Exception {
         String jsonContent = readResourceAsString("chat1.json");
         RawChatFile file = new RawChatFile("chat1.json", jsonContent);
-        JacksonChatExportParserImpl parser = new JacksonChatExportParserImpl();
+        ChatExportParserImpl parser = new ChatExportParserImpl();
 
         ChatExport result = parser.parse(file);
         List<ChatExport.Message> messages = result.getMessages();
@@ -53,7 +53,7 @@ class JacksonChatExportParserTest {
     void shouldParseMentionsCorrectly() throws Exception {
         String jsonContent = readResourceAsString("chat1.json");
         RawChatFile file = new RawChatFile("chat1.json", jsonContent);
-        JacksonChatExportParserImpl parser = new JacksonChatExportParserImpl();
+        ChatExportParserImpl parser = new ChatExportParserImpl();
 
         ChatExport result = parser.parse(file);
         List<ChatExport.Message> messages = result.getMessages();
@@ -72,7 +72,7 @@ class JacksonChatExportParserTest {
     @Test
     void shouldThrowExceptionOnBlankContent() {
         RawChatFile file = new RawChatFile("empty.json", "");
-        JacksonChatExportParserImpl parser = new JacksonChatExportParserImpl();
+        ChatExportParserImpl parser = new ChatExportParserImpl();
 
         assertThrows(ChatExportParseException.class, () -> parser.parse(file));
     }
@@ -80,7 +80,7 @@ class JacksonChatExportParserTest {
     @Test
     void shouldThrowExceptionOnInvalidJson() {
         RawChatFile file = new RawChatFile("invalid.json", "{ invalid json }");
-        JacksonChatExportParserImpl parser = new JacksonChatExportParserImpl();
+        ChatExportParserImpl parser = new ChatExportParserImpl();
 
         assertThrows(ChatExportParseException.class, () -> parser.parse(file));
     }
@@ -89,7 +89,7 @@ class JacksonChatExportParserTest {
     void shouldParseMultipleMentionsInOneMessage() throws Exception {
         String jsonContent = readResourceAsString("chat1.json");
         RawChatFile file = new RawChatFile("chat1.json", jsonContent);
-        JacksonChatExportParserImpl parser = new JacksonChatExportParserImpl();
+        ChatExportParserImpl parser = new ChatExportParserImpl();
 
         ChatExport result = parser.parse(file);
         List<ChatExport.Message> messages = result.getMessages();
@@ -127,7 +127,7 @@ class JacksonChatExportParserTest {
                 """;
 
         RawChatFile file = new RawChatFile("test.json", jsonWithEmptyEntities);
-        JacksonChatExportParserImpl parser = new JacksonChatExportParserImpl();
+        ChatExportParserImpl parser = new ChatExportParserImpl();
 
         ChatExport result = parser.parse(file);
         assertNotNull(result);

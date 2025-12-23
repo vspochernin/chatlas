@@ -4,6 +4,7 @@ import ru.hackathon.chatlas.analysis.ChatAnalyzer;
 import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.RawChatFile;
+import ru.hackathon.chatlas.domain.ReportResult;
 import ru.hackathon.chatlas.export.ReportRenderer;
 import ru.hackathon.chatlas.parser.ChatExportParser;
 
@@ -35,7 +36,7 @@ public class ChatProcessingService {
      * @return результат обработки в формате текста или Excel.
      * @throws ChatProcessingException если обработка не удалась.
      */
-    public ReportRenderer.ReportResult process(RawChatFile file) throws ChatProcessingException {
+    public ReportResult process(RawChatFile file) throws ChatProcessingException {
         try {
             // 1. Парсим JSON в доменную модель.
             ChatExport chatExport = parser.parse(file);
@@ -43,8 +44,8 @@ public class ChatProcessingService {
             // 2. Анализируем и извлекаем участников/упоминания.
             ChatAnalysisResult analysisResult = analyzer.analyze(chatExport);
 
-            // 3. Форматируем результат в (текст или Excel).
-            return renderer.render(analysisResult);
+            // 3. Форматируем результат (текст или Excel).
+            return renderer.render(analysisResult, file.fileName());
 
         } catch (ChatExportParser.ChatExportParseException e) {
             throw new ChatProcessingException("Failed to parse chat export", e);

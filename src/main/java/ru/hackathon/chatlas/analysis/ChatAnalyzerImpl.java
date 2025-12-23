@@ -17,6 +17,7 @@ public class ChatAnalyzerImpl implements ChatAnalyzer {
 
     private static final String DELETED_ACCOUNT_NAME_EN = "Deleted Account";
     private static final String DELETED_ACCOUNT_NAME_RU = "Удалённый аккаунт";
+    private static final String MENTION_TYPE_NAME = "mention";
 
     @Override
     public ChatAnalysisResult analyze(ChatExport chatExport) throws ChatAnalysisException {
@@ -89,7 +90,7 @@ public class ChatAnalyzerImpl implements ChatAnalyzer {
             }
 
             // Ищем сущности типа "mention".
-            if ("mention".equals(entity.getType()) && entity.getText() != null) {
+            if (MENTION_TYPE_NAME.equals(entity.getType()) && entity.getText() != null) {
                 String mentionText = entity.getText().trim();
                 if (!mentionText.isBlank()) {
                     try {

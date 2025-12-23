@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChatExport {
+
     private String name;
     private String type;
     private Long id;

@@ -6,8 +6,7 @@ import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.Mention;
 import ru.hackathon.chatlas.domain.Participant;
-import ru.hackathon.chatlas.parser.JacksonChatExportParserImpl;
-import ru.hackathon.chatlas.parser.ChatExportParser.ChatExportParseException;
+import ru.hackathon.chatlas.parser.ChatExportParserImpl;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +18,7 @@ class ChatAnalyzerIntegrationTest {
     @Test
     void shouldAnalyzeRealChatExport() throws Exception {
         String jsonContent = readResourceAsString("chat1.json");
-        var parser = new JacksonChatExportParserImpl();
+        var parser = new ChatExportParserImpl();
         var analyzer = new ChatAnalyzerImpl();
 
         ChatExport chatExport = parser.parse(new ru.hackathon.chatlas.domain.RawChatFile("chat1.json", jsonContent));

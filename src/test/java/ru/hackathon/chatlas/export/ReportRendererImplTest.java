@@ -249,8 +249,8 @@ class ReportRendererImplTest {
 
             assertEquals(today.toString(), row1.getCell(0).getStringCellValue());
             assertEquals(today.toString(), row2.getCell(0).getStringCellValue());
-            assertEquals(2, row1.getLastCellNum()); // 2 колонки: Дата экспорта, Username
-            assertEquals(2, row2.getLastCellNum()); // 2 колонки: Дата экспорта, Username
+            assertEquals(2, row1.getLastCellNum()); // 2 колонки: Дата экспорта, Username.
+            assertEquals(2, row2.getLastCellNum()); // 2 колонки: Дата экспорта, Username.
             assertTrue(mentions.contains("@username1"));
             assertTrue(mentions.contains("@username2"));
         }

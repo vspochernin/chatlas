@@ -20,37 +20,27 @@ class MentionTest {
 
     @Test
     void shouldThrowExceptionOnNullMentionText() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Mention(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Mention(null));
     }
 
     @Test
     void shouldThrowExceptionOnBlankMentionText() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Mention("");
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Mention(""));
     }
 
     @Test
     void shouldThrowExceptionOnWhitespaceMentionText() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Mention("   ");
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Mention("   "));
     }
 
     @Test
     void shouldThrowExceptionIfNotStartsWithAt() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Mention("username");
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Mention("username"));
     }
 
     @Test
     void shouldThrowExceptionIfStartsWithSpaceThenAt() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Mention(" @username");
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Mention(" @username"));
     }
 
     @Test

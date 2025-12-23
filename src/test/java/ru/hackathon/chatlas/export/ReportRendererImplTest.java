@@ -288,9 +288,7 @@ class ReportRendererImplTest {
 
     @Test
     void shouldThrowExceptionOnNullAnalysisResult() {
-        assertThrows(Exception.class, () -> {
-            renderer.render(null, "test.json");
-        });
+        assertThrows(Exception.class, () -> renderer.render(null, "test.json"));
     }
 
     @Test

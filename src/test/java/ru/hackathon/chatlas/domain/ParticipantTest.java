@@ -22,23 +22,17 @@ class ParticipantTest {
 
     @Test
     void shouldThrowExceptionOnNullDisplayName() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Participant("user123", null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Participant("user123", null));
     }
 
     @Test
     void shouldThrowExceptionOnNullFromId() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Participant(null, "Display Name");
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Participant(null, "Display Name"));
     }
 
     @Test
     void shouldThrowExceptionOnBlankFromId() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Participant("", "Display Name");
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Participant("", "Display Name"));
     }
 
     @Test

@@ -15,7 +15,7 @@ public class BotConfig {
      */
     public static final int EXCEL_THRESHOLD = 51;
 
+    // Утильный класс.
     private BotConfig() {
-        // Утильный класс.
     }
 }

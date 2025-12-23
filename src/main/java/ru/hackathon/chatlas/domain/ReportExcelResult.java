@@ -4,6 +4,7 @@ package ru.hackathon.chatlas.domain;
  * Результат форматирования отчета в виде Excel-файла.
  */
 public final class ReportExcelResult extends ReportResult {
+
     private final byte[] excelBytes;
     private final String excelFileName;
 

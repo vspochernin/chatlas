@@ -4,6 +4,7 @@ package ru.hackathon.chatlas.domain;
  * Результат форматирования отчета в виде текста.
  */
 public final class ReportTextResult extends ReportResult {
+
     private final String text;
 
     public ReportTextResult(String fileName, String text) {

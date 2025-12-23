@@ -4,8 +4,7 @@ import ru.hackathon.chatlas.domain.ChatAnalysisResult;
 import ru.hackathon.chatlas.domain.ReportResult;
 
 /**
- * Сервис для форматирования результата анализа.
- * Генерирует текстовый ответ или Excel-файл в зависимости от количества сущностей.
+ * Интерфейс для форматирования результата анализа.
  */
 public interface ReportRenderer {
 

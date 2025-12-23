@@ -17,6 +17,7 @@ import java.util.List;
 
 /**
  * Реализация сервиса для форматирования результата анализа.
+ * Генерирует текстовый ответ или Excel-файл в зависимости от количества сущностей.
  */
 public class ReportRendererImpl implements ReportRenderer {
 

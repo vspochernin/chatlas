@@ -7,6 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import ru.hackathon.chatlas.domain.ChatExport;
 import ru.hackathon.chatlas.domain.RawChatFile;
 
+/**
+ * Реализация сервиса для парсинга JSON-экспорта чата Telegram в доменную модель.
+ */
 @Slf4j
 public class ChatExportParserImpl implements ChatExportParser {
 

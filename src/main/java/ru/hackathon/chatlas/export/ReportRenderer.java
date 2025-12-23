@@ -6,7 +6,6 @@ import ru.hackathon.chatlas.domain.ReportResult;
 /**
  * Сервис для форматирования результата анализа.
  * Генерирует текстовый ответ или Excel-файл в зависимости от количества сущностей.
- *
  */
 public interface ReportRenderer {
 
@@ -14,7 +13,7 @@ public interface ReportRenderer {
      * Отформатировать результат анализа: создаёт текстовый ответ или Excel-файл в зависимости от количества сущностей.
      *
      * @param analysisResult результат анализа чата.
-     * @param fileName имя исходного файла экспорта.
+     * @param fileName       имя исходного файла экспорта.
      * @return результат форматирования (ReportTextResult или ReportExcelResult).
      * @throws ReportRenderException если не удалось сформировать результат.
      */

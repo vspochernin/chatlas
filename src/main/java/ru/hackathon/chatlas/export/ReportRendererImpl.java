@@ -15,6 +15,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Реализация сервиса для форматирования результата анализа.
+ */
 public class ReportRendererImpl implements ReportRenderer {
 
     @Override
@@ -23,12 +26,12 @@ public class ReportRendererImpl implements ReportRenderer {
             int totalCount = analysisResult.getTotalCount();
 
             if (totalCount < BotConfig.EXCEL_THRESHOLD) {
-                // Генерируем только текстовый ответ.
+                // Генерируем текстовый ответ.
                 String text = renderText(analysisResult, fileName);
                 return new ReportTextResult(fileName, text);
             } else {
-                // Генерируем только Excel-файл.
-                byte[] excelBytes = renderExcel(analysisResult, fileName);
+                // Генерируем Excel-файл.
+                byte[] excelBytes = renderExcel(analysisResult);
                 String excelFileName = generateExcelFileName(fileName);
                 return new ReportExcelResult(fileName, excelBytes, excelFileName);
             }
@@ -47,31 +50,29 @@ public class ReportRendererImpl implements ReportRenderer {
         sb.append("Количество упоминаний: ").append(mentionsCount).append("\n\n");
 
         sb.append("Участники:\n");
-        result.participants().forEach(p ->
-                sb.append("- ")
-                        .append(p.displayName())
-                        .append("\n")
-        );
+        result.participants().forEach(p -> sb
+                .append("- ")
+                .append(p.displayName())
+                .append("\n"));
 
         if (mentionsCount > 0) {
             sb.append("\nУпоминания:\n");
-            result.mentions().forEach(m ->
-                    sb.append("- ")
-                            .append(m.mentionText())
-                            .append("\n")
-            );
+            result.mentions().forEach(m -> sb
+                    .append("- ")
+                    .append(m.mentionText())
+                    .append("\n"));
         }
 
         return sb.toString();
     }
 
-    private byte[] renderExcel(ChatAnalysisResult result, String fileName) throws Exception {
+    private byte[] renderExcel(ChatAnalysisResult result) throws Exception {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheetMembers = workbook.createSheet("Участники");
             Sheet sheetMentions = workbook.createSheet("Упоминания");
 
-            createHeaderMembers(sheetMembers);
-            createHeaderMentions(sheetMentions);
+            createHeaderMembersSheet(sheetMembers);
+            createHeaderMentionsSheet(sheetMentions);
 
             List<RowData> rowsMembers = collectRowsMembers(result);
             writeRowsMembers(sheetMembers, rowsMembers);
@@ -95,7 +96,7 @@ public class ReportRendererImpl implements ReportRenderer {
         return baseFileName + "-" + LocalDate.now() + ".xlsx";
     }
 
-    private void createHeaderMembers(Sheet sheet) {
+    private void createHeaderMembersSheet(Sheet sheet) {
         Row header = sheet.createRow(0);
 
         String[] columns = {
@@ -109,7 +110,7 @@ public class ReportRendererImpl implements ReportRenderer {
         }
     }
 
-    private void createHeaderMentions(Sheet sheet) {
+    private void createHeaderMentionsSheet(Sheet sheet) {
         Row header = sheet.createRow(0);
 
         String[] columns = {
@@ -128,11 +129,7 @@ public class ReportRendererImpl implements ReportRenderer {
 
         // Участники.
         for (Participant p : result.participants()) {
-            rows.add(new RowData(
-                    exportDate.toString(),
-                    p.fromId(),
-                    p.displayName()
-            ));
+            rows.add(new RowData(exportDate.toString(), p.fromId(), p.displayName()));
         }
 
         return rows;
@@ -144,11 +141,7 @@ public class ReportRendererImpl implements ReportRenderer {
 
         // Упоминания.
         for (Mention m : result.mentions()) {
-            rows.add(new RowData(
-                    exportDate.toString(),
-                    m.mentionText(),
-                    ""
-            ));
+            rows.add(new RowData(exportDate.toString(), m.mentionText(), ""));
         }
 
         return rows;
@@ -191,12 +184,6 @@ public class ReportRendererImpl implements ReportRenderer {
                 .trim();
     }
 
-    /* ================= DTO ================= */
-
-    private record RowData(
-            String exportDate,
-            String username,
-            String fullName
-    ) {}
-
+    private record RowData(String exportDate, String username, String fullName) {
+    }
 }

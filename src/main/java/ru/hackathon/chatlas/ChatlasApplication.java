@@ -12,6 +12,9 @@ import ru.hackathon.chatlas.parser.ChatExportParserImpl;
 import ru.hackathon.chatlas.telegram.ChatlasBot;
 import ru.hackathon.chatlas.telegram.ChatProcessingService;
 
+/**
+ * Точка входа приложения.
+ */
 @Slf4j
 public class ChatlasApplication {
 

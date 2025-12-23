@@ -154,10 +154,9 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             // Скачиваем файл в память (обрабатываем "на лету", не сохраняем на диск).
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             inputStream.transferTo(buffer);
-            byte[] fileContent = buffer.toByteArray();
 
             // Преобразуем байты в строку JSON (UTF-8).
-            String jsonContent = new String(fileContent, java.nio.charset.StandardCharsets.UTF_8);
+            String jsonContent = buffer.toString(java.nio.charset.StandardCharsets.UTF_8);
             RawChatFile rawFile = new RawChatFile(fileName, jsonContent);
             safeSendText(chatId, "Обрабатываю файл \"" + fileName + "\"...");
 

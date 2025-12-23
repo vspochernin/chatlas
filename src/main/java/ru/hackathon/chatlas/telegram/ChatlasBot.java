@@ -25,6 +25,9 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ * Основной класс Telegram бота.
+ */
 @Slf4j
 public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
 
@@ -87,10 +90,10 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
     private void sendStartMessage(Long chatId) {
         String msg = """
                 Привет! Я бот Chatlas.
-
+                
                 Пришлите мне один или несколько JSON-файлов экспорта чата из Telegram Desktop.
                 Я обработаю их и подготовлю список участников / Excel-файл согласно заданию хакатона.
-
+                
                 Если нужна справка - используйте команду /help.
                 """.strip();
         safeSendText(chatId, msg);
@@ -99,13 +102,13 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
     private void sendHelpMessage(Long chatId) {
         String msg = """
                 Что я умею:
-
+                
                 - Принимаю JSON-экспорт истории чата (Telegram Desktop -> Export chat history -> JSON).
                 - Каждый файл обрабатывается сразу после отправки.
                 - Извлекаю участников (авторов сообщений) и упоминания (@username).
                 - Если всего сущностей <= 50 - отправляю список прямо в чат.
                 - Если всего сущностей >= 51 - формирую и отправляю Excel-файл.
-
+                
                 Просто отправьте мне .json-файл экспорта чата.
                 """.strip();
         safeSendText(chatId, msg);
@@ -114,11 +117,11 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
     private void handlePlainTextMessage(Long chatId) {
         String msg = """
                 Привет! Я жду JSON-файлы экспорта чата.
-
+                
                 1) В Telegram Desktop сделайте экспорт истории чата в формате JSON.
                 2) Пришлите полученный .json-файл сюда как документ.
                 3) Я обработаю его и верну результат.
-
+                
                 Подробности - команда /help.
                 """.strip();
         safeSendText(chatId, msg);
@@ -158,7 +161,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
             RawChatFile rawFile = new RawChatFile(fileName, jsonContent);
             safeSendText(chatId, "Обрабатываю файл \"" + fileName + "\"...");
 
-            // Обрабатываем через сервис.
+            // Обрабатываем через сервис-фасад.
             ReportResult result = processingService.process(rawFile);
 
             // Отправляем результат в зависимости от типа через pattern matching (Java 21 switch expression).

@@ -132,8 +132,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         String mimeType = document.getMimeType();
 
         log.info(
-                "Received document from chat {}: name='{}', mime='{}', size={}",
-                chatId,
+                "Received document from chat: name='{}', mime='{}', size={}",
                 fileName,
                 mimeType,
                 document.getFileSize());

@@ -132,8 +132,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         String mimeType = document.getMimeType();
 
         log.info(
-                "Received document from chat {}: name='{}', mime='{}', size={}",
-                chatId,
+                "Received document from chat: name='{}', mime='{}', size={}",
                 fileName,
                 mimeType,
                 document.getFileSize());
@@ -174,7 +173,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
                 }
             }
 
-            log.info("File {} processed successfully for chat {}", fileName, chatId);
+            log.info("File {} processed successfully for chat", fileName);
         } catch (TelegramApiException e) {
             log.error("Failed to download file from Telegram for chat {}, fileId {}", chatId, fileId, e);
             safeSendText(chatId, "Не удалось скачать файл \"" + fileName + "\".");
@@ -232,7 +231,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
                     .build();
 
             telegramClient.execute(sendDocument);
-            log.info("Excel file sent to chat {}", chatId);
+            log.info("Excel file sent to chat");
 
         } catch (TelegramApiException e) {
             log.error("Failed to send Excel file to chat {}", chatId, e);
@@ -250,7 +249,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         }
 
         String urlString = API_TELEGRAM_FILE_BOT_BASE_URL + botToken + "/" + filePath;
-        log.info("Downloading file from Telegram: {}", urlString);
+        log.info("Downloading file from Telegram");
 
         URL url = URI.create(urlString).toURL();
         URLConnection connection = url.openConnection();

@@ -24,7 +24,7 @@ public class ChatExportParserImpl implements ChatExportParser {
     @Override
     public ChatExport parse(RawChatFile file) throws ChatExportParseException {
         try {
-            log.debug("Parsing file: {}", file.fileName());
+            log.info("Parsing file: {}", file.fileName());
 
             if (file.jsonContent().isBlank()) {
                 throw new ChatExportParseException("JSON content is blank");

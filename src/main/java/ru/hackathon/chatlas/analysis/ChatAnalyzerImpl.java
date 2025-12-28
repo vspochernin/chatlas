@@ -45,7 +45,7 @@ public class ChatAnalyzerImpl implements ChatAnalyzer {
             extractMentions(message, mentions);
         }
 
-        log.debug("Analysis completed: {} participants, {} mentions", participants.size(), mentions.size());
+        log.info("Analysis completed: {} participants, {} mentions", participants.size(), mentions.size());
         return new ChatAnalysisResult(participants, mentions);
     }
 
@@ -65,7 +65,7 @@ public class ChatAnalyzerImpl implements ChatAnalyzer {
 
         // Пропускаем удалённые аккаунты.
         if (isDeletedAccount(from)) {
-            log.debug("Skipping deleted account: fromId={}, from={}", fromId, from);
+            log.info("Skipping deleted account: fromId={}, from={}", fromId, from);
             return;
         }
 

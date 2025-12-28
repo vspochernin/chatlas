@@ -43,7 +43,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         this.telegramClient = new OkHttpTelegramClient(botToken);
         this.botToken = botToken;
         this.processingService = processingService;
-        log.info("ChatlasBot instance created");
+        log.debug("ChatlasBot instance created");
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         String fileName = document.getFileName();
         String mimeType = document.getMimeType();
 
-        log.info(
+        log.debug(
                 "Received document from chat {}: name='{}', mime='{}', size={}",
                 chatId,
                 fileName,
@@ -174,7 +174,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
                 }
             }
 
-            log.info("File {} processed successfully for chat {}", fileName, chatId);
+            log.debug("File {} processed successfully for chat {}", fileName, chatId);
         } catch (TelegramApiException e) {
             log.error("Failed to download file from Telegram for chat {}, fileId {}", chatId, fileId, e);
             safeSendText(chatId, "Не удалось скачать файл \"" + fileName + "\".");
@@ -232,7 +232,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
                     .build();
 
             telegramClient.execute(sendDocument);
-            log.info("Excel file sent to chat {}", chatId);
+            log.debug("Excel file sent to chat {}", chatId);
 
         } catch (TelegramApiException e) {
             log.error("Failed to send Excel file to chat {}", chatId, e);
@@ -250,7 +250,7 @@ public class ChatlasBot implements LongPollingSingleThreadUpdateConsumer {
         }
 
         String urlString = API_TELEGRAM_FILE_BOT_BASE_URL + botToken + "/" + filePath;
-        log.info("Downloading file from Telegram: {}", urlString);
+        log.debug("Downloading file from Telegram: {}", urlString);
 
         URL url = URI.create(urlString).toURL();
         URLConnection connection = url.openConnection();

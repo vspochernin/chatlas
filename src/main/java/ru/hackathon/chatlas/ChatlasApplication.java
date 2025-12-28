@@ -35,7 +35,7 @@ public class ChatlasApplication {
 
             TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
             botsApplication.registerBot(botToken, bot);
-            log.info("Chatlas bot successfully started");
+            log.debug("Chatlas bot successfully started");
         } catch (TelegramApiException e) {
             log.error("Failed to register Telegram bot", e);
             System.exit(1);
